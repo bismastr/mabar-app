@@ -79,8 +79,8 @@ func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 func DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	userid := i.Member.User.ID
-	alrJoin := fmt.Sprintf("Hei <@%v>, kalo udah join ga boleh sekip bang :( Wajib Ikut", userid, GenerateMemberMention())
-	noJoin := fmt.Sprintf("<@%v> tidak join duls, kecewaaaa sangat berat! Join sini lahh :(", userid, GenerateMemberMention())
+	alrJoin := fmt.Sprintf("Hei <@%v>, kalo udah join ga boleh sekip bang :( Wajib Ikut", userid)
+	noJoin := fmt.Sprintf("<@%v> tidak join duls, kecewaaaa sangat berat! Join sini lahh :(", userid)
 
 	if CheckJoin(i.Member.User.ID) {
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
