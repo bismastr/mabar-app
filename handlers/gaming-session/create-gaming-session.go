@@ -78,11 +78,15 @@ func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 }
 
 func DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	userid := i.Member.User.ID
+	alrJoin := fmt.Sprintf("Hei <@%v>, kalo udah join ga boleh sekip bang :( Wajib Ikut", userid, GenerateMemberMention())
+	noJoin := fmt.Sprintf("<@%v> tidak join duls, kecewaaaa sangat berat! Join sini lahh :(", userid, GenerateMemberMention())
+
 	if CheckJoin(i.Member.User.ID) {
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: "Kalo udah join ga boleh sekip bang :( Wajib Ikut",
+				Content: alrJoin,
 				Flags:   discordgo.MessageFlagsEphemeral,
 			},
 		})
@@ -95,7 +99,7 @@ func DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Kecewa beraaaaaaaat! Join lah bang :(",
+			Content: noJoin,
 		},
 	})
 	if err != nil {
