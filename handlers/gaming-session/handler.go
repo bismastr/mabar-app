@@ -5,13 +5,24 @@ import (
 )
 
 var (
-	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"basic-command": CreateGamingSession,
+	commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+		"create-mabar": CreateGamingSession,
+	}
+	componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+		"mabar_yes": JoinGamingSession,
+		"mabar_no":  DeclineGamingSession,
 	}
 )
 
 func AddGamingSessionCommandData(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-		h(s, i)
+	switch i.Type {
+	case discordgo.InteractionApplicationCommand:
+		if h, ok := commandsHandlers[i.ApplicationCommandData().Name]; ok {
+			h(s, i)
+		}
+	case discordgo.InteractionMessageComponent:
+		if h, ok := componentsHandlers[i.MessageComponentData().CustomID]; ok {
+			h(s, i)
+		}
 	}
 }

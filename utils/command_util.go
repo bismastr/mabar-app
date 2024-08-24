@@ -9,8 +9,8 @@ import (
 var (
 	commands = []*discordgo.ApplicationCommand{
 		{
-			Name:        "basic-command",
-			Description: "Basic command",
+			Name:        "create-mabar",
+			Description: "New Mabar Session",
 		},
 	}
 )
