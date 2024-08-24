@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	dg, err := discordgo.New("Bot " + os.Getenv("DISCORD_BOT_TOKEN"))
+	dg, err := discordgo.New("Bot " + os.Getenv(""))
 	if err != nil {
 		fmt.Println("error creating Discord session,", err)
 		return
