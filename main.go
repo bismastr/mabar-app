@@ -6,7 +6,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/bismastr/discord-bot/handlers/basic"
 	gamingSessionHandler "github.com/bismastr/discord-bot/handlers/gaming-session"
 	"github.com/bismastr/discord-bot/utils"
 	"github.com/bwmarrin/discordgo"
@@ -20,7 +19,6 @@ func main() {
 	}
 
 	//Handler
-	dg.AddHandler(basic.PingPongMessage)
 	dg.AddHandler(gamingSessionHandler.AddGamingSessionCommandData)
 
 	dg.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
