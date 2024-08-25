@@ -10,7 +10,11 @@ var (
 	commands = []*discordgo.ApplicationCommand{
 		{
 			Name:        "create-mabar",
-			Description: "New Mabar Session",
+			Description: "Buat Sesi Mabar Baru",
+		},
+		{
+			Name:        "buyar-sek",
+			Description: "Hapus Sesi Mabar",
 		},
 	}
 )
@@ -18,7 +22,7 @@ var (
 func AddAllCommand(dg *discordgo.Session) {
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
 	for i, v := range commands {
-		cmd, err := dg.ApplicationCommandCreate(dg.State.User.ID, "", v)
+		cmd, err := dg.ApplicationCommandCreate(dg.State.Application.ID, "", v)
 		if err != nil {
 			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
 		}
