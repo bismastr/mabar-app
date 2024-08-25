@@ -7,6 +7,7 @@ import (
 var (
 	commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"create-mabar": CreateGamingSession,
+		"buyar-sek":    DeleteGamingSession,
 	}
 	componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"mabar_yes": JoinGamingSession,

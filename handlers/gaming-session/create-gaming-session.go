@@ -8,44 +8,63 @@ import (
 
 var (
 	membersSession []string
+	mabarSession   bool
 )
 
 func CreateGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: "# Info Info Info Mabar dulu ga sih? @here",
-			Components: []discordgo.MessageComponent{
-				discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{
-						discordgo.Button{
-							Emoji: &discordgo.ComponentEmoji{
-								Name: "🔥",
+	if !mabarSession {
+		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: "# Info Info Info Mabar dulu ga sih? @here",
+				Components: []discordgo.MessageComponent{
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							discordgo.Button{
+								Emoji: &discordgo.ComponentEmoji{
+									Name: "🔥",
+								},
+								Label:    "Gas Join!",
+								Style:    discordgo.PrimaryButton,
+								CustomID: "mabar_yes",
 							},
-							Label:    "Gas Join!",
-							Style:    discordgo.PrimaryButton,
-							CustomID: "mabar_yes",
-						},
-						discordgo.Button{
-							Emoji: &discordgo.ComponentEmoji{
-								Name: "❌",
+							discordgo.Button{
+								Emoji: &discordgo.ComponentEmoji{
+									Name: "❌",
+								},
+								Label:    "Skip duls",
+								Style:    discordgo.SecondaryButton,
+								CustomID: "mabar_no",
 							},
-							Label:    "Skip duls",
-							Style:    discordgo.SecondaryButton,
-							CustomID: "mabar_no",
 						},
 					},
 				},
 			},
-		},
-	})
-	if err != nil {
-		panic(err)
+		})
+		if err != nil {
+			panic(err)
+		} else {
+			mabarSession = true
+		}
+	} else {
+		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: "❌ Sesi mabar sudah ada, kawanku",
+			},
+		})
+
+		if err != nil {
+			panic(err)
+		}
 	}
+
 }
 
 func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if CheckJoin(i.Member.User.ID) {
+	userid := i.Member.User.ID
+
+	if CheckJoin(userid) {
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -61,9 +80,7 @@ func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 
 	membersSession = append(membersSession, i.Member.User.ID)
-
-	userId := i.Member.User.ID
-	messageContent := fmt.Sprintf("<@%v>Join abang quh 🥳\n\nArek-arek sing join 👥:%v  ", userId, GenerateMemberMention())
+	messageContent := fmt.Sprintf("<@%v>Join abang quh 🥳\n\nArek-arek sing join 👥:%v  ", userid, GenerateMemberMention())
 	go func() {
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -104,6 +121,38 @@ func DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	})
 	if err != nil {
 		panic(err)
+	}
+}
+
+func DeleteGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if mabarSession {
+		messageContent := "Buyar dulu kawanku, sampai jumpa di mabar berikutnya!👋"
+		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: messageContent,
+			},
+		})
+
+		mabarSession = false
+		membersSession = nil
+
+		if err != nil {
+			panic(err)
+		}
+
+	} else {
+		messageContent := "❌ Tidak ada sesi mabar yang berjalan, kawan"
+		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: messageContent,
+			},
+		})
+
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
