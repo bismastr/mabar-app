@@ -80,7 +80,7 @@ func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 
 	membersSession = append(membersSession, i.Member.User.ID)
-	messageContent := fmt.Sprintf("<@%v>Join abang quh 🥳\n\nArek-arek sing join 👥:%v  ", userid, GenerateMemberMention())
+	messageContent := fmt.Sprintf("<@%v> join abang quh 🥳\n\nArek-arek sing join 👥:%v  ", userid, GenerateMemberMention())
 	go func() {
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
