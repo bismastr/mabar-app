@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -17,14 +18,14 @@ type DbClient struct {
 }
 
 func NewFirebaseClient(ctx context.Context) *DbClient {
-	credsPath := os.Getenv("FIREBASE_CREDENTIALS_PATH")
+	creds := os.Getenv("FIREBASE_CREDENTIALS")
 
-	creds, err := os.ReadFile(credsPath)
+	decoded, err := base64.StdEncoding.DecodeString(creds)
 	if err != nil {
-		log.Fatalf("Failed to read credentials file: %v", err)
+		log.Fatalf("Failed to decode Base64: %v", err)
 	}
 
-	sa := option.WithCredentialsJSON(creds)
+	sa := option.WithCredentialsJSON(decoded)
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)
