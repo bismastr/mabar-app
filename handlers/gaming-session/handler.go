@@ -2,6 +2,7 @@ package gaming_session
 
 import (
 	"context"
+	"strings"
 
 	"github.com/bismastr/discord-bot/db"
 	"github.com/bwmarrin/discordgo"
@@ -12,7 +13,7 @@ var (
 		"create-mabar": CreateSession,
 		// "buyar-sek":    DeleteGamingSession,
 	}
-	componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient){
+	componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context){
 		"mabar_yes": JoinGamingSession,
 		// "mabar_no":  DeclineGamingSession,
 	}
@@ -25,8 +26,12 @@ func AddGamingSessionCommandData(s *discordgo.Session, i *discordgo.InteractionC
 			h(s, i, db, ctx)
 		}
 	case discordgo.InteractionMessageComponent:
-		if h, ok := componentsHandlers[i.MessageComponentData().CustomID]; ok {
-			h(s, i, db)
+		customID := i.MessageComponentData().CustomID
+		split := strings.Split(customID, "_")
+		prefix := split[0] + "_" + split[1]
+
+		if h, ok := componentsHandlers[prefix]; ok {
+			h(s, i, db, ctx)
 		}
 	}
 }

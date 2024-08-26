@@ -43,15 +43,15 @@ func NewFirebaseClient(ctx context.Context) *DbClient {
 	}
 }
 
-func (d *DbClient) CreateGamingSession(ctx context.Context, req model.GamingSession) error {
+func (d *DbClient) CreateGamingSession(ctx context.Context, req model.GamingSession) (string, error) {
 	client := d.Client
 
-	_, _, err := client.Collection("gaming-sessions").Add(ctx, req)
+	docRef, _, err := client.Collection("gaming-sessions").Add(ctx, req)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return docRef.ID, nil
 }
 
 func (d *DbClient) ReadGamingSessionByCreatedUserId(ctx context.Context, id string) (*model.GamingSession, error) {
@@ -74,6 +74,34 @@ func (d *DbClient) ReadGamingSessionByCreatedUserId(ctx context.Context, id stri
 	err = doc.DataTo(&session)
 	if err != nil {
 		return nil, fmt.Errorf("failed to map document data: %w", err)
+	}
+
+	return &session, nil
+}
+
+func (d *DbClient) AddMemberToSession(ctx context.Context, refId string, newMember string) (*model.GamingSession, error) {
+	client := d.Client
+
+	// Get the specific document by ID
+	docRef := client.Collection("gaming-sessions").Doc(refId)
+	doc, err := docRef.Get(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get document: %w", err)
+	}
+
+	var session model.GamingSession
+	err = doc.DataTo(&session)
+	if err != nil {
+		return nil, fmt.Errorf("failed to map document data: %w", err)
+	}
+
+	// Update member session
+	session.MembersSession = append(session.MembersSession, newMember)
+	_, err = docRef.Set(ctx, map[string]interface{}{
+		"members_sessions": session.MembersSession,
+	}, firestore.MergeAll)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update document: %w", err)
 	}
 
 	return &session, nil

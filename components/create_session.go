@@ -2,7 +2,7 @@ package components
 
 import "github.com/bwmarrin/discordgo"
 
-func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate, id string) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -16,7 +16,7 @@ func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 							},
 							Label:    "Gas Join!",
 							Style:    discordgo.PrimaryButton,
-							CustomID: "mabar_yes",
+							CustomID: "mabar_yes_" + id,
 						},
 						discordgo.Button{
 							Emoji: &discordgo.ComponentEmoji{

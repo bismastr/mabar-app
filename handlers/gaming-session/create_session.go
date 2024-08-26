@@ -2,7 +2,6 @@ package gaming_session
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/bismastr/discord-bot/components"
@@ -28,12 +27,12 @@ func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.
 		IsFinish:     false,
 	}
 
-	err := db.CreateGamingSession(ctx, session)
+	id, err := db.CreateGamingSession(ctx, session)
 	if err != nil {
 		panic(err)
 	}
 
-	components.CreateSession(s, i)
+	components.CreateSession(s, i, id)
 }
 
 func IsHaveSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context) bool {
@@ -42,12 +41,11 @@ func IsHaveSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.
 		panic(err)
 	}
 
-	fmt.Println(session)
-
+	//If no session, then user doesnt have session active
 	if session == nil {
 		return false
 	}
-
+	//Need to check is session finished or not. If still have session active then user cannot create mabar
 	if !session.IsFinish {
 		return true
 	} else {

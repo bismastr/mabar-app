@@ -1,43 +1,28 @@
 package gaming_session
 
 import (
+	"context"
 	"fmt"
+	"strings"
 
+	"github.com/bismastr/discord-bot/components"
 	"github.com/bismastr/discord-bot/db"
 	"github.com/bwmarrin/discordgo"
 )
 
-func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient) {
+func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context) {
 	userid := i.Member.User.ID
+	customId := i.MessageComponentData().CustomID
 
-	if CheckJoin(userid) {
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "Kamu udah join bang :(",
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
-		if err != nil {
-			panic(err)
-		}
+	split := strings.Split(customId, "_")
+	refId := split[2]
 
-		return
+	result, err := db.AddMemberToSession(ctx, refId, userid)
+	if err != nil {
+		panic(err)
 	}
 
-	membersSession = append(membersSession, i.Member.User.ID)
-	messageContent := fmt.Sprintf("<@%v> join abang quh 🥳\n\nArek-arek sing join 👥:%v  ", userid, GenerateMemberMention())
-	go func() {
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: messageContent,
-			},
-		})
-		if err != nil {
-			panic(err)
-		}
-	}()
+	components.JoinSession(s, i, userid, GenerateMemberMention(result.MembersSession))
 }
 
 func DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient) {

@@ -9,9 +9,9 @@ var (
 	mabarSession   bool
 )
 
-func GenerateMemberMention() string {
+func GenerateMemberMention(members []string) string {
 	result := ""
-	for _, s := range membersSession {
+	for _, s := range members {
 		result += fmt.Sprintf("<@%v>", s)
 	}
 	return result
