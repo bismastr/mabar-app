@@ -1,10 +1,13 @@
 package gaming_session
 
 import (
+	"context"
+
+	"github.com/bismastr/discord-bot/db"
 	"github.com/bwmarrin/discordgo"
 )
 
-func DeleteGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func DeleteGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context) {
 	if mabarSession {
 		messageContent := "Buyar dulu kawanku, sampai jumpa di mabar berikutnya!👋"
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

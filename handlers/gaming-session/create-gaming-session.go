@@ -1,10 +1,20 @@
 package gaming_session
 
 import (
+	"context"
+
+	"github.com/bismastr/discord-bot/db"
+	"github.com/bismastr/discord-bot/model"
 	"github.com/bwmarrin/discordgo"
 )
 
-func CreateGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func CreateGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context) {
+	session := model.GamingSession{
+		CreatedAt: "bisma testing create session",
+	}
+
+	db.CreateGamingSession(ctx, session)
+
 	if !mabarSession {
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
