@@ -9,12 +9,12 @@ import (
 
 var (
 	commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context){
-		"create-mabar": CreateGamingSession,
-		"buyar-sek":    DeleteGamingSession,
+		"create-mabar": CreateSession,
+		// "buyar-sek":    DeleteGamingSession,
 	}
 	componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient){
 		"mabar_yes": JoinGamingSession,
-		"mabar_no":  DeclineGamingSession,
+		// "mabar_no":  DeclineGamingSession,
 	}
 )
 

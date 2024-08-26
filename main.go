@@ -9,7 +9,6 @@ import (
 
 	"github.com/bismastr/discord-bot/db"
 	gamingSessionHandler "github.com/bismastr/discord-bot/handlers/gaming-session"
-	"github.com/bismastr/discord-bot/model"
 	"github.com/bismastr/discord-bot/utils"
 	"github.com/bwmarrin/discordgo"
 )
@@ -27,10 +26,6 @@ func main() {
 	//Handler
 	dg.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		gamingSessionHandler.AddGamingSessionCommandData(s, i, fireBaseClient, ctx)
-	})
-
-	fireBaseClient.CreateGamingSession(ctx, model.GamingSession{
-		CreatedAt: "Testing in main",
 	})
 
 	dg.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
