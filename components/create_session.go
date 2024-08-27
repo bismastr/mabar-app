@@ -6,7 +6,7 @@ func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate, id stri
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "# Info Info Info Mabar dulu ga sih? @here",
+			Content: "## Ada info Minecraft or CS nanri malam? @here",
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
