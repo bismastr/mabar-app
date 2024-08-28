@@ -15,7 +15,7 @@ var (
 	}
 	componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context){
 		"mabar_yes": JoinGamingSession,
-		// "mabar_no":  DeclineGamingSession,
+		"mabar_no":  DeclineGamingSession,
 	}
 )
 
