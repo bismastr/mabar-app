@@ -11,9 +11,12 @@ import (
 	gamingSessionHandler "github.com/bismastr/discord-bot/handlers/gaming-session"
 	"github.com/bismastr/discord-bot/utils"
 	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load()
+
 	ctx := context.Background()
 	fireBaseClient := db.NewFirebaseClient(ctx)
 
