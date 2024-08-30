@@ -16,6 +16,10 @@ var (
 			Name:        "buyar-sek",
 			Description: "Hapus Sesi Mabar",
 		},
+		{
+			Name:        "list-mabar",
+			Description: "Melihat list of gaming Session ",
+		},
 	}
 )
 

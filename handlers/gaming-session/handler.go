@@ -11,6 +11,7 @@ import (
 var (
 	commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context){
 		"create-mabar": CreateSession,
+		"list-mabar":   ListSession,
 		// "buyar-sek":    DeleteGamingSession,
 	}
 	componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context){
