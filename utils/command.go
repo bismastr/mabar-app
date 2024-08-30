@@ -11,14 +11,6 @@ var (
 		{
 			Name:        "create-mabar",
 			Description: "Buat Sesi Mabar Baru",
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "game-name",
-					Description: "Nama Game",
-					Required:    false,
-				},
-			},
 		},
 		{
 			Name:        "buyar-sek",
