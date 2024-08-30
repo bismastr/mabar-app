@@ -98,7 +98,6 @@ func (d *DbClient) AddMemberToSession(ctx context.Context, refId string, newMemb
 
 	// Get members, check if newMember already joined
 	members, _ := d.GetMembersList(ctx, refId)
-	fmt.Print(slices.Contains(members.MembersSession, newMember))
 
 	if slices.Contains(members.MembersSession, newMember) {
 		// If it contains newMember, it will return nil model.GamingSession, but 0 erro, dev pls fix
