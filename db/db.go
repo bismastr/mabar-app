@@ -106,3 +106,29 @@ func (d *DbClient) AddMemberToSession(ctx context.Context, refId string, newMemb
 
 	return &session, nil
 }
+
+func (d *DbClient) ReadGamingSession(ctx context.Context) ([]model.GamingSession, error) {
+	client := d.Client
+	var result []model.GamingSession
+
+	iter := client.Collection("gaming-sessions").Documents(ctx)
+	defer iter.Stop()
+
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return result, err
+		}
+
+		var docIteration model.GamingSession
+		doc.DataTo(&docIteration)
+
+		result = append(result, docIteration)
+	}
+
+	return result, nil
+}
