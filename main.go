@@ -1,17 +1,25 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/bismastr/discord-bot/db"
 	gamingSessionHandler "github.com/bismastr/discord-bot/handlers/gaming-session"
 	"github.com/bismastr/discord-bot/utils"
 	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load()
+
+	ctx := context.Background()
+	fireBaseClient := db.NewFirebaseClient(ctx)
+
 	dg, err := discordgo.New("Bot " + os.Getenv("DISCORD_BOT_TOKEN"))
 	if err != nil {
 		fmt.Println("error creating Discord session,", err)
@@ -19,7 +27,9 @@ func main() {
 	}
 
 	//Handler
-	dg.AddHandler(gamingSessionHandler.AddGamingSessionCommandData)
+	dg.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		gamingSessionHandler.AddGamingSessionCommandData(s, i, fireBaseClient, ctx)
+	})
 
 	dg.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
@@ -39,5 +49,7 @@ func main() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 
+	// Close when exit
+	defer fireBaseClient.Client.Close()
 	dg.Close()
 }
