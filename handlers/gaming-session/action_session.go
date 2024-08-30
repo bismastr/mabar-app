@@ -23,7 +23,11 @@ func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db 
 		panic(err)
 	}
 
-	components.JoinSession(s, i, userid, utils.GenerateMemberMention(result.MembersSession))
+	if result == nil {
+		components.AlreadyInSession(s, i)
+	} else {
+		components.JoinSession(s, i, userid, utils.GenerateMemberMention(result.MembersSession))
+	}
 }
 
 func DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context) {
