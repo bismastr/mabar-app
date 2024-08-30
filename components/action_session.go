@@ -20,11 +20,10 @@ func JoinSession(s *discordgo.Session, i *discordgo.InteractionCreate, userId st
 }
 
 func AlreadyInSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	messageContent := fmt.Sprint("Kamu udah join sesi, abangkuh")
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: messageContent,
+			Content: "Kamu udah join sesi, abangkuh",
 			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
