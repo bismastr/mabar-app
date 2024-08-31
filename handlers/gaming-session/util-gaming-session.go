@@ -1,8 +1,6 @@
 package gaming_session
 
 import (
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 )
 
