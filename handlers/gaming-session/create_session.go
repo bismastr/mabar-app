@@ -16,6 +16,12 @@ func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.
 		return
 	}
 
+	// Getting option (slash-command parameter) value
+	gameName := ""
+	if optionValue := GetOptionValueByName(i, "nama-permainan"); optionValue != nil {
+		gameName = optionValue.(string)
+	}
+
 	session := model.GamingSession{
 		CreatedAt: time.Now().String(),
 		CreatedBy: &model.CreatedBy{
@@ -24,18 +30,13 @@ func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.
 		},
 		SessionEnd:   "", //Need to add session
 		SessionStart: "",
+		GameName:     gameName,
 		IsFinish:     false,
 	}
 
 	id, err := db.CreateGamingSession(ctx, session)
 	if err != nil {
 		panic(err)
-	}
-
-	// Getting option (slash-command parameter) value
-	gameName := ""
-	if optionValue := GetOptionValueByName(i, "nama-permainan"); optionValue != nil {
-		gameName = optionValue.(string)
 	}
 
 	components.CreateSession(s, i, id, gameName)
