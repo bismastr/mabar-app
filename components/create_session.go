@@ -1,12 +1,19 @@
 package components
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/bwmarrin/discordgo"
+)
 
-func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate, id string) {
+func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate, id string, gameName string) {
+	content := "## Ada info " + gameName + " hari ini? @here"
+	if gameName == "" {
+		content = "## Ada info Minecraft or CS nanti malam? @here"
+	}
+
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "## Ada info Minecraft or CS nanti malam? @here",
+			Content: content,
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{

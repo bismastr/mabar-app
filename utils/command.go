@@ -10,11 +10,23 @@ var (
 	commands = []*discordgo.ApplicationCommand{
 		{
 			Name:        "create-mabar",
-			Description: "Buat Sesi Mabar Baru",
+			Description: "Buat sesi mabar baru. Kamu bisa tambahkan nama permainan/game (opsional)",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "nama-permainan",
+					Description: "Nama Permainan/Game",
+					Required:    false,
+				},
+			},
 		},
 		{
 			Name:        "buyar-sek",
 			Description: "Hapus Sesi Mabar",
+		},
+		{
+			Name:        "list-mabar",
+			Description: "Melihat list of gaming Session ",
 		},
 	}
 )
