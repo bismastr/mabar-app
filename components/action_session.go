@@ -18,3 +18,16 @@ func JoinSession(s *discordgo.Session, i *discordgo.InteractionCreate, userId st
 		panic(err)
 	}
 }
+
+func AlreadyInSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "Kamu udah join sesi, abangkuh",
+			Flags:   discordgo.MessageFlagsEphemeral,
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+}

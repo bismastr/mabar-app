@@ -132,3 +132,18 @@ func (d *DbClient) ReadGamingSession(ctx context.Context) ([]model.GamingSession
 
 	return result, nil
 }
+
+func (d *DbClient) GetMembersList(ctx context.Context, refId string) (*model.GamingSession, error) {
+	client := d.Client
+
+	docRef := client.Collection("gaming-sessions").Doc(refId)
+	doc, _ := docRef.Get(ctx)
+
+	var m *model.GamingSession
+	err := doc.DataTo(&m)
+	if err != nil {
+		return nil, err
+	}
+
+	return m, err
+}
