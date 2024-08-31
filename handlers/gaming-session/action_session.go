@@ -3,6 +3,7 @@ package gaming_session
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/bismastr/discord-bot/components"
@@ -18,14 +19,21 @@ func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db 
 	split := strings.Split(customId, "_")
 	refId := split[2]
 
-	result, err := db.AddMemberToSession(ctx, refId, userid)
+	// Get members list from the current refId
+	joined, err := db.GetMembersList(ctx, refId)
 	if err != nil {
 		panic(err)
 	}
 
-	if result == nil {
+	if slices.Contains(joined.MembersSession, userid) {
 		components.AlreadyInSession(s, i)
 	} else {
+
+		result, err := db.AddMemberToSession(ctx, refId, userid)
+		if err != nil {
+			panic(err)
+		}
+
 		components.JoinSession(s, i, userid, utils.GenerateMemberMention(result.MembersSession))
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"slices"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -96,24 +95,16 @@ func (d *DbClient) AddMemberToSession(ctx context.Context, refId string, newMemb
 		return nil, fmt.Errorf("failed to map document data: %w", err)
 	}
 
-	// Get members, check if newMember already joined
-	members, _ := d.GetMembersList(ctx, refId)
-
-	if slices.Contains(members.MembersSession, newMember) {
-		// If it contains newMember, it will return nil model.GamingSession, but 0 erro, dev pls fix
-		return nil, nil
-	} else {
-		// Update member session
-		session.MembersSession = append(session.MembersSession, newMember)
-		_, err = docRef.Set(ctx, map[string]interface{}{
-			"members_sessions": session.MembersSession,
-		}, firestore.MergeAll)
-		if err != nil {
-			return nil, fmt.Errorf("failed to update document: %w", err)
-		}
-
-		return &session, nil
+	// Update member session
+	session.MembersSession = append(session.MembersSession, newMember)
+	_, err = docRef.Set(ctx, map[string]interface{}{
+		"members_sessions": session.MembersSession,
+	}, firestore.MergeAll)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update document: %w", err)
 	}
+
+	return &session, nil
 }
 
 func (d *DbClient) ReadGamingSession(ctx context.Context) ([]model.GamingSession, error) {
