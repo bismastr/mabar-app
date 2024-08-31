@@ -11,5 +11,6 @@ type GamingSession struct {
 	SessionEnd     string     `firestore:"session_end,omitempty"`
 	SessionStart   string     `firestore:"session_start,omitempty"`
 	MembersSession []string   `firestore:"members_sessions,omitempty"`
+	GameName       string     `firestore:"game_name,omitempty"`
 	IsFinish       bool
 }
