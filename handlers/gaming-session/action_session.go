@@ -3,6 +3,7 @@ package gaming_session
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/bismastr/discord-bot/components"
@@ -18,12 +19,15 @@ func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db 
 	split := strings.Split(customId, "_")
 	refId := split[2]
 
-	result, err := db.AddMemberToSession(ctx, refId, userid)
-	if err != nil {
-		panic(err)
+	if IsInSession(refId, userid, db, ctx) {
+		components.AlreadyInSession(s, i)
+	} else {
+		result, err := db.AddMemberToSession(ctx, refId, userid)
+		if err != nil {
+			panic(err)
+		}
+		components.JoinSession(s, i, userid, utils.GenerateMemberMention(result.MembersSession))
 	}
-
-	components.JoinSession(s, i, userid, utils.GenerateMemberMention(result.MembersSession))
 }
 
 func DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context) {
@@ -38,5 +42,18 @@ func DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, 
 	})
 	if err != nil {
 		panic(err)
+	}
+}
+
+func IsInSession(refId string, userid string, db *db.DbClient, ctx context.Context) bool {
+	joined, err := db.GetMembersList(ctx, refId)
+	if err != nil {
+		panic(err)
+	}
+
+	if slices.Contains(joined.MembersSession, userid) {
+		return true
+	} else {
+		return false
 	}
 }
