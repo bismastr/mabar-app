@@ -7,6 +7,7 @@ import (
 
 	"github.com/bismastr/discord-bot/components"
 	"github.com/bismastr/discord-bot/db"
+	"github.com/bismastr/discord-bot/utils"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -22,7 +23,7 @@ func JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db 
 		panic(err)
 	}
 
-	components.JoinSession(s, i, userid, GenerateMemberMention(result.MembersSession))
+	components.JoinSession(s, i, userid, utils.GenerateMemberMention(result.MembersSession))
 }
 
 func DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context) {
