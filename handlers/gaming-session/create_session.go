@@ -32,7 +32,13 @@ func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.
 		panic(err)
 	}
 
-	components.CreateSession(s, i, id)
+	// Getting option (slash-command parameter) value
+	gameName := ""
+	if optionValue := GetOptionValueByName(i, "nama-permainan"); optionValue != nil {
+		gameName = optionValue.(string)
+	}
+
+	components.CreateSession(s, i, id, gameName)
 }
 
 func IsHaveSession(s *discordgo.Session, i *discordgo.InteractionCreate, db *db.DbClient, ctx context.Context) bool {
