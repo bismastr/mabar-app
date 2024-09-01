@@ -9,6 +9,7 @@ import (
 
 	"github.com/bismastr/discord-bot/db"
 	gamingSessionHandler "github.com/bismastr/discord-bot/handlers/gaming-session"
+	"github.com/bismastr/discord-bot/internal/server"
 	"github.com/bismastr/discord-bot/utils"
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -38,6 +39,13 @@ func main() {
 	if err != nil {
 		fmt.Println("error opening connection,", err)
 		return
+	}
+
+	server := server.NewServer(fireBaseClient)
+
+	err = server.ListenAndServe()
+	if err != nil {
+		panic(fmt.Sprintf("cannot start server: %s", err))
 	}
 
 	//Add all command
