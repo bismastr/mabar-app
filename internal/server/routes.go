@@ -1,22 +1,35 @@
 package server
 
 import (
-	"net/http"
-
+	"github.com/bismastr/discord-bot/internal/handler/rest"
+	"github.com/bismastr/discord-bot/internal/session"
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Server) RegisterRoutes() http.Handler{
-	r := gin.Default()
+func (s *Server) RegisterRoutes() {
+	apiV1 := s.router.Group("api/v1")
 
-	r.GET("/health", s.HealthCheck)
-
-	return r
+	s.healthRoutes(apiV1)
+	s.gamingSessionRoutes(apiV1)
 }
 
-func (s *Server) HealthCheck(c *gin.Context)  {
-	resp := make(map[string]string)
-	resp["message"] = "service ok"
+func (s *Server) healthRoutes(api *gin.RouterGroup) {
+	healthRoutes := api.Group("/health")
 
-	c.JSON(http.StatusOK, resp)
+	{
+		h := rest.NewHealthCtrl()
+		healthRoutes.GET("/ping", h.Ping)
+	}
+}
+
+func (s *Server) gamingSessionRoutes(api *gin.RouterGroup) {
+	gamingSessionRoutes := api.Group("/health")
+
+	{
+		repository := session.NewRepositoryImpl(s.database)
+		h := rest.NewSessionCtrl(session.NewGamingSessionService(repository))
+
+		gamingSessionRoutes.POST("/", h.CreateGamingSession)
+		gamingSessionRoutes.PUT("/", h.UpdateGamingSessionByRefId)
+	}
 }

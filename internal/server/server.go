@@ -1,29 +1,23 @@
 package server
 
 import (
-	"net/http"
-	"time"
-
-	"github.com/bismastr/discord-bot/db"
+	"github.com/bismastr/discord-bot/internal/database"
+	"github.com/gin-gonic/gin"
 )
 
-
 type Server struct {
-	db db.DbClient
+	router   *gin.Engine
+	database *database.DbClient
 }
 
-func NewServer(database *db.DbClient) *http.Server {
-	NewServer := &Server{
-		db: *database,
+func NewServer(e *gin.Engine, db *database.DbClient) *Server {
+	return &Server{
+		router:   e,
+		database: db,
 	}
 
-	server := &http.Server{
-		Addr: ":8080",
-		Handler:      NewServer.RegisterRoutes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
+}
 
-	return server
+func (s *Server) Start() error {
+	return s.router.Run(":8080")
 }
