@@ -23,7 +23,7 @@ func (s *Server) healthRoutes(api *gin.RouterGroup) {
 }
 
 func (s *Server) gamingSessionRoutes(api *gin.RouterGroup) {
-	gamingSessionRoutes := api.Group("/health")
+	gamingSessionRoutes := api.Group("/gaming-session")
 
 	{
 		repository := session.NewRepositoryImpl(s.database)
