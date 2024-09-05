@@ -1,22 +1,12 @@
-package gaming_session
+package bot
 
 import (
+	"slices"
+
+	"github.com/bismastr/discord-bot/components"
+	"github.com/bismastr/discord-bot/internal/session"
 	"github.com/bwmarrin/discordgo"
 )
-
-var (
-	membersSession []string
-	mabarSession   bool
-)
-
-func CheckJoin(userId string) bool {
-	for _, u := range membersSession {
-		if u == userId {
-			return true
-		}
-	}
-	return false
-}
 
 func GetOptionValueByName(i *discordgo.InteractionCreate, optionName string) any {
 	var optionValue any
@@ -33,4 +23,13 @@ func GetOptionValueByName(i *discordgo.InteractionCreate, optionName string) any
 	}
 
 	return optionValue
+}
+
+func IsInSession(gs *session.GamingSession, userid string, s *discordgo.Session, i *discordgo.InteractionCreate) bool {
+	if slices.Contains(gs.MembersSession, userid) {
+		components.AlreadyInSession(s, i)
+		return true
+	}
+
+	return false
 }

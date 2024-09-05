@@ -1,4 +1,4 @@
-package utils
+package bot
 
 import (
 	"log"
@@ -31,10 +31,14 @@ var (
 	}
 )
 
-func AddAllCommand(dg *discordgo.Session) {
+func (b *Bot) AddAllCommand() {
+	if b.dg == nil {
+		log.Panic("dg is nil")
+	}
+
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
 	for i, v := range commands {
-		cmd, err := dg.ApplicationCommandCreate(dg.State.User.ID, "", v)
+		cmd, err := b.dg.ApplicationCommandCreate(b.dg.State.User.ID, "", v)
 		if err != nil {
 			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
 		}
