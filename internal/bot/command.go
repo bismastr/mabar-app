@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
@@ -20,14 +21,14 @@ var (
 				},
 			},
 		},
-		{
-			Name:        "buyar-sek",
-			Description: "Hapus Sesi Mabar",
-		},
-		{
-			Name:        "list-mabar",
-			Description: "Melihat list of gaming Session ",
-		},
+		// {
+		// 	Name:        "buyar-sek",
+		// 	Description: "Hapus Sesi Mabar",
+		// },
+		// {
+		// 	Name:        "list-mabar",
+		// 	Description: "Melihat list of gaming Session ",
+		// },
 	}
 )
 
@@ -35,13 +36,11 @@ func (b *Bot) AddAllCommand() {
 	if b.dg == nil {
 		log.Panic("dg is nil")
 	}
-
-	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
-	for i, v := range commands {
-		cmd, err := b.dg.ApplicationCommandCreate(b.dg.State.User.ID, "", v)
-		if err != nil {
-			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
-		}
-		registeredCommands[i] = cmd
+	//Delete Existing Command
+	b.dg.ApplicationCommandDelete(b.dg.State.Application.ID, "", "")
+	//Add new command
+	_, err := b.dg.ApplicationCommandBulkOverwrite(b.dg.State.User.ID, "", commands)
+	if err != nil {
+		fmt.Printf("Error creating commands: %v", err)
 	}
 }
