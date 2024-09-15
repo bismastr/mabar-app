@@ -76,11 +76,7 @@ func (a *ActionHandlerCtrl) DeclineGamingSession(s *discordgo.Session, i *discor
 // This function will check is user already in session or not. If not, then it will create the gaming session.
 // After that, it will respond to user with a message that user create the gaming session.
 func (a *ActionHandlerCtrl) CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	gameName := ""
-	if optionValue := GetOptionValueByName(i, "nama-permainan"); optionValue != nil {
-		gameName = optionValue.(string)
-	}
-
+	gameName := []discordgo.PollAnswer{}
 	session := session.GamingSession{
 		CreatedAt: time.Now().String(),
 		CreatedBy: &session.CreatedBy{
@@ -89,14 +85,89 @@ func (a *ActionHandlerCtrl) CreateSession(s *discordgo.Session, i *discordgo.Int
 		},
 		SessionEnd:   "", //Need to add session
 		SessionStart: "",
-		GameName:     gameName,
 		IsFinish:     false,
 	}
 
-	id, err := a.gamingSessionService.CreateGamingSession(a.ctx, session)
+	for _, v := range i.ApplicationCommandData().Options {
+		if v.StringValue() != "" {
+			gameName = append(gameName, discordgo.PollAnswer{
+				Media: &discordgo.PollMedia{
+					Text: v.StringValue(),
+				},
+			})
+		}
+	}
+	//
+
+	//Switch
+	var gameText string
+	switch len(gameName) {
+	case 1:
+		gameText = gameName[0].Media.Text
+		session.GameName = gameText
+		id, err := a.gamingSessionService.CreateGamingSession(a.ctx, session)
+		if err != nil {
+			panic(err)
+		}
+		components.CreateSession(s, i, id, gameText)
+	case 0:
+		session.GameName = ""
+		id, err := a.gamingSessionService.CreateGamingSession(a.ctx, session)
+		if err != nil {
+			panic(err)
+		}
+		components.CreateSession(s, i, id, "")
+	default:
+		id, err := a.gamingSessionService.CreateGamingSession(a.ctx, session)
+		if err != nil {
+			panic(err)
+		}
+		components.CreateSessionPoll(s, i, gameName, id)
+	}
+}
+
+func (a *ActionHandlerCtrl) InitMabar(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	//RefId
+	customId := i.MessageComponentData().CustomID
+	split := strings.Split(customId, "_")
+	refId := split[2]
+
+	currentRef, err := a.gamingSessionService.GetGamingSessionByRefId(a.ctx, refId)
 	if err != nil {
 		panic(err)
 	}
 
-	components.CreateSession(s, i, id, gameName)
+	if currentRef.CreatedBy.Id != i.Member.User.ID {
+		components.UnableCreateSession(s, i)
+		return
+	}
+
+	m, _ := s.PollExpire(i.ChannelID, i.Message.ID)
+
+	var userWinning []*discordgo.User
+	var gameName string
+	for _, v := range m.Poll.Answers {
+		user, _ := s.PollAnswerVoters(i.ChannelID, i.Message.ID, v.AnswerID)
+
+		if len(user) > len(userWinning) {
+			userWinning = user
+			gameName = v.Media.Text
+		}
+	}
+
+	updateGamingSession := session.GamingSession{
+		GameName: gameName,
+	}
+
+	for _, v := range userWinning {
+		updateGamingSession.MembersSession = append(updateGamingSession.MembersSession, v.ID)
+	}
+
+	err = a.gamingSessionService.UpdateGamingSessionByRefId(a.ctx, refId, updateGamingSession)
+	if err != nil {
+		panic(err)
+	}
+
+	components.InitMabar(s, i, gameName, utils.GenerateMemberMention(updateGamingSession.MembersSession))
+	defer s.ChannelMessageDelete(i.ChannelID, i.Message.ID)
 }

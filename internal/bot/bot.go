@@ -20,7 +20,7 @@ func NewBot(dg *discordgo.Session, database *database.DbClient) *Bot {
 }
 
 func (b *Bot) Open() {
-	b.dg.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
+	b.dg.Identify.Intents = discordgo.IntentsAll
 	err := b.dg.Open()
 	if err != nil {
 		panic(err)

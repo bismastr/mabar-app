@@ -15,12 +15,31 @@ var (
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "nama-permainan",
+					Name:        "game-name-1",
+					Description: "Nama Permainan/Game",
+					Required:    false,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "game-name-2",
+					Description: "Nama Permainan/Game",
+					Required:    false,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "game-name-3",
+					Description: "Nama Permainan/Game",
+					Required:    false,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "game-name-4",
 					Description: "Nama Permainan/Game",
 					Required:    false,
 				},
 			},
 		},
+
 		// {
 		// 	Name:        "buyar-sek",
 		// 	Description: "Hapus Sesi Mabar",
@@ -37,9 +56,12 @@ func (b *Bot) AddAllCommand() {
 		log.Panic("dg is nil")
 	}
 	//Delete Existing Command
-	b.dg.ApplicationCommandDelete(b.dg.State.Application.ID, "", "")
+	err := b.dg.ApplicationCommandDelete(b.dg.State.Application.ID, "", "")
+	if err != nil {
+		fmt.Printf("Error creating commands: %v", err)
+	}
 	//Add new command
-	_, err := b.dg.ApplicationCommandBulkOverwrite(b.dg.State.User.ID, "", commands)
+	_, err = b.dg.ApplicationCommandBulkOverwrite(b.dg.State.Application.ID, "", commands)
 	if err != nil {
 		fmt.Printf("Error creating commands: %v", err)
 	}

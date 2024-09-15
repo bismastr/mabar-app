@@ -16,15 +16,15 @@ func (b *Bot) RegisterHandler() {
 func (b *Bot) interactionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	repository := session.NewRepositoryImpl(b.database)
 	h := bot.NewActionHandlerCtrl(session.NewGamingSessionService(repository), context.Background())
-
 	var (
 		commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 			"create-mabar": h.CreateSession,
 			// "list-mabar":   ListSession,
 		}
 		componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-			"mabar_yes": h.JoinGamingSession,
-			"mabar_no":  h.DeclineGamingSession,
+			"mabar_yes":  h.JoinGamingSession,
+			"mabar_no":   h.DeclineGamingSession,
+			"init_mabar": h.InitMabar,
 		}
 	)
 
