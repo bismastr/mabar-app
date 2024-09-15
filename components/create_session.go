@@ -55,7 +55,7 @@ func CreateSessionPoll(s *discordgo.Session, i *discordgo.InteractionCreate, ans
 				Answers:          answers,
 				AllowMultiselect: true,
 				LayoutType:       discordgo.PollLayoutTypeDefault,
-				Duration:         1,
+				Duration:         24,
 			},
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
