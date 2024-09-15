@@ -40,7 +40,6 @@ func InitMabar(s *discordgo.Session, i *discordgo.InteractionCreate, gameName st
 			Content: content,
 		},
 	})
-
 	if err != nil {
 		panic(err)
 	}
