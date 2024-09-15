@@ -31,3 +31,17 @@ func AlreadyInSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		panic(err)
 	}
 }
+
+func InitMabar(s *discordgo.Session, i *discordgo.InteractionCreate, gameName string, members string) {
+	content := fmt.Sprintf("# Mabar Started! 🔥 \n## Playing %v\n\nAyo join bang! %v", gameName, members)
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: content,
+		},
+	})
+
+	if err != nil {
+		panic(err)
+	}
+}
