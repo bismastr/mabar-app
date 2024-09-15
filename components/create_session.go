@@ -82,7 +82,7 @@ func UnableCreateSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "❌ Sesi mabar sudah ada, kawanku",
+			Content: "❌ You cannot start other people's session. Only session creator can start the session.",
 		},
 	})
 

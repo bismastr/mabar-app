@@ -127,12 +127,22 @@ func (a *ActionHandlerCtrl) CreateSession(s *discordgo.Session, i *discordgo.Int
 }
 
 func (a *ActionHandlerCtrl) InitMabar(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	m, _ := s.PollExpire(i.ChannelID, i.Message.ID)
-
 	//RefId
 	customId := i.MessageComponentData().CustomID
 	split := strings.Split(customId, "_")
 	refId := split[2]
+
+	currentRef, err := a.gamingSessionService.GetGamingSessionByRefId(a.ctx, refId)
+	if err != nil {
+		panic(err)
+	}
+
+	if currentRef.CreatedBy.Id != i.Member.User.ID {
+		components.UnableCreateSession(s, i)
+		return
+	}
+
+	m, _ := s.PollExpire(i.ChannelID, i.Message.ID)
 
 	var userWinning []*discordgo.User
 	var gameName string
@@ -153,7 +163,7 @@ func (a *ActionHandlerCtrl) InitMabar(s *discordgo.Session, i *discordgo.Interac
 		updateGamingSession.MembersSession = append(updateGamingSession.MembersSession, v.ID)
 	}
 
-	err := a.gamingSessionService.UpdateGamingSessionByRefId(a.ctx, refId, updateGamingSession)
+	err = a.gamingSessionService.UpdateGamingSessionByRefId(a.ctx, refId, updateGamingSession)
 	if err != nil {
 		panic(err)
 	}
