@@ -7,7 +7,7 @@ import (
 func CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate, id string, gameName string) {
 	content := "## Ada info " + gameName + " hari ini? @here"
 	if gameName == "" {
-		content = "## Ada info Minecraft or CS nanti malam? @here"
+		content = "## Ada info permainan hari ini? @here"
 	}
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
