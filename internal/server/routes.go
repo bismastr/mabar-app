@@ -11,6 +11,7 @@ func (s *Server) RegisterRoutes() {
 
 	s.healthRoutes(apiV1)
 	s.gamingSessionRoutes(apiV1)
+	s.botGamingSessionRoutes(apiV1)
 }
 
 func (s *Server) healthRoutes(api *gin.RouterGroup) {
@@ -31,5 +32,16 @@ func (s *Server) gamingSessionRoutes(api *gin.RouterGroup) {
 
 		gamingSessionRoutes.POST("/", h.CreateGamingSession)
 		gamingSessionRoutes.PUT("/", h.UpdateGamingSessionByRefId)
+	}
+}
+
+func (s *Server) botGamingSessionRoutes(api *gin.RouterGroup) {
+	botRoutes := api.Group("/bot/gaming-session")
+
+	{
+		repository := session.NewRepositoryImpl(s.database)
+		h := rest.NewBotCtrl(session.NewBotGamingSessionService(repository, s.dg), session.NewGamingSessionService(repository))
+
+		botRoutes.POST("/create", h.CreateGamingSession)
 	}
 }
