@@ -33,7 +33,7 @@ func main() {
 	bot.Open()
 	bot.AddAllCommand()
 	//Start Server
-	server := server.NewServer(gin.Default(), serverFirebaseClient)
+	server := server.NewServer(gin.Default(), serverFirebaseClient, bot.Dg)
 	server.RegisterRoutes()
 	server.Start()
 

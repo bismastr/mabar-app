@@ -52,16 +52,16 @@ var (
 )
 
 func (b *Bot) AddAllCommand() {
-	if b.dg == nil {
+	if b.Dg == nil {
 		log.Panic("dg is nil")
 	}
 	//Delete Existing Command
-	err := b.dg.ApplicationCommandDelete(b.dg.State.Application.ID, "", "")
+	err := b.Dg.ApplicationCommandDelete(b.Dg.State.Application.ID, "", "")
 	if err != nil {
 		fmt.Printf("Error creating commands: %v", err)
 	}
 	//Add new command
-	_, err = b.dg.ApplicationCommandBulkOverwrite(b.dg.State.Application.ID, "", commands)
+	_, err = b.Dg.ApplicationCommandBulkOverwrite(b.Dg.State.Application.ID, "", commands)
 	if err != nil {
 		fmt.Printf("Error creating commands: %v", err)
 	}

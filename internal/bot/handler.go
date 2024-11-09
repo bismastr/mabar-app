@@ -10,7 +10,7 @@ import (
 
 func (b *Bot) RegisterHandler() {
 	//Action Handler
-	b.dg.AddHandler(b.interactionHandler)
+	b.Dg.AddHandler(b.interactionHandler)
 }
 
 func (b *Bot) interactionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {

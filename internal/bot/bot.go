@@ -8,20 +8,20 @@ import (
 )
 
 type Bot struct {
-	dg       *discordgo.Session
+	Dg       *discordgo.Session
 	database *database.DbClient
 }
 
 func NewBot(dg *discordgo.Session, database *database.DbClient) *Bot {
 	return &Bot{
-		dg:       dg,
+		Dg:       dg,
 		database: database,
 	}
 }
 
 func (b *Bot) Open() {
-	b.dg.Identify.Intents = discordgo.IntentsAll
-	err := b.dg.Open()
+	b.Dg.Identify.Intents = discordgo.IntentsAll
+	err := b.Dg.Open()
 	if err != nil {
 		panic(err)
 	}
