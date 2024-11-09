@@ -34,7 +34,7 @@ func (b *botCtrl) CreateGamingSession(c *gin.Context) {
 		return
 	}
 
-	res, err := b.botService.CreateGamingSession(id, newGamingSession.GameName)
+	res, err := b.botService.CreateGamingSession(id, &newGamingSession)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

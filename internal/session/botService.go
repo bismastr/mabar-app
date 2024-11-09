@@ -1,6 +1,10 @@
 package session
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"fmt"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 type BotGamingSessionService struct {
 	repository FirestoreRepositorySession
@@ -14,11 +18,11 @@ func NewBotGamingSessionService(repo FirestoreRepositorySession, dg *discordgo.S
 	}
 }
 
-func (b *BotGamingSessionService) CreateGamingSession(id string, gameName string) (*discordgo.Message, error) {
+func (b *BotGamingSessionService) CreateGamingSession(id string, gamingSession *GamingSession) (*discordgo.Message, error) {
 	b.dg.ChannelMessageSend("1276782792876888075", "test create gaming session")
 
-	content := "## Ada info " + gameName + " hari ini? @here"
-	if gameName == "" {
+	content := fmt.Sprintf("## Ada info %s hari ini? @here \n created by @%s", gamingSession.GameName, gamingSession.CreatedBy.Username)
+	if gamingSession.GameName == "" {
 		content = "## Ada info permainan hari ini? @here"
 	}
 	message := &discordgo.MessageSend{
