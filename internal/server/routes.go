@@ -13,6 +13,7 @@ func (s *Server) RegisterRoutes() {
 	s.healthRoutes(apiV1)
 	s.gamingSessionRoutes(apiV1)
 	s.botGamingSessionRoutes(apiV1)
+	s.authRoutes(apiV1)
 }
 
 func (s *Server) healthRoutes(api *gin.RouterGroup) {
@@ -44,5 +45,14 @@ func (s *Server) botGamingSessionRoutes(api *gin.RouterGroup) {
 		h := handler.NewBotCtrl(bot.NewBotGamingSessionService(repository, s.dg), gamingSession.NewGamingSessionService(repository))
 
 		botRoutes.POST("/create", h.CreateGamingSession)
+	}
+}
+
+func (s *Server) authRoutes(api *gin.RouterGroup) {
+	authRoutes := api.Group("/auth")
+
+	{
+		authRoutes.GET("/:provider/callback", handler.Callback)
+		authRoutes.GET("/:provider", handler.Login)
 	}
 }
