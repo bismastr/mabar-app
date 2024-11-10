@@ -8,7 +8,6 @@ import (
 
 	"github.com/bismastr/discord-bot/internal/bot/components"
 	"github.com/bismastr/discord-bot/internal/gamingSession"
-	"github.com/bismastr/discord-bot/utils"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -52,7 +51,7 @@ func (a *ActionHandlerCtrl) JoinGamingSession(s *discordgo.Session, i *discordgo
 		panic(err)
 	}
 
-	components.JoinSession(s, i, userid, utils.GenerateMemberMention(updateMember.MembersSession))
+	components.JoinSession(s, i, userid, GenerateMemberMention(updateMember.MembersSession))
 }
 
 // DeclineGamingSession is a function to handle user who decline the gaming session.
@@ -168,6 +167,6 @@ func (a *ActionHandlerCtrl) InitMabar(s *discordgo.Session, i *discordgo.Interac
 		panic(err)
 	}
 
-	components.InitMabar(s, i, gameName, utils.GenerateMemberMention(updateGamingSession.MembersSession))
+	components.InitMabar(s, i, gameName, GenerateMemberMention(updateGamingSession.MembersSession))
 	defer s.ChannelMessageDelete(i.ChannelID, i.Message.ID)
 }

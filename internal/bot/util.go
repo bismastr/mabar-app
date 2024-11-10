@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 
@@ -41,4 +42,12 @@ func getPrefix(i *discordgo.InteractionCreate) string {
 	prefix := split[0] + "_" + split[1]
 
 	return prefix
+}
+
+func GenerateMemberMention(members []string) string {
+	result := ""
+	for _, s := range members {
+		result += fmt.Sprintf("<@%v>", s)
+	}
+	return result
 }
