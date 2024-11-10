@@ -1,4 +1,4 @@
-package session
+package gamingSession
 
 import "context"
 

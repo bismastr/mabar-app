@@ -3,28 +3,57 @@ package bot
 import (
 	"fmt"
 
-	"github.com/bismastr/discord-bot/internal/database"
+	"github.com/bismastr/discord-bot/internal/gamingSession"
 	"github.com/bwmarrin/discordgo"
 )
 
-type Bot struct {
-	Dg       *discordgo.Session
-	database *database.DbClient
+type BotGamingSessionService struct {
+	repository gamingSession.FirestoreRepositorySession
+	dg         *discordgo.Session
 }
 
-func NewBot(dg *discordgo.Session, database *database.DbClient) *Bot {
-	return &Bot{
-		Dg:       dg,
-		database: database,
+func NewBotGamingSessionService(repo gamingSession.FirestoreRepositorySession, dg *discordgo.Session) *BotGamingSessionService {
+	return &BotGamingSessionService{
+		repository: repo,
+		dg:         dg,
 	}
 }
 
-func (b *Bot) Open() {
-	b.Dg.Identify.Intents = discordgo.IntentsAll
-	err := b.Dg.Open()
+func (b *BotGamingSessionService) CreateGamingSession(id string, gamingSession *gamingSession.GamingSession) (*discordgo.Message, error) {
+	content := fmt.Sprintf("## Ada info %s hari ini? @here \n created by @%s", gamingSession.GameName, gamingSession.CreatedBy.Username)
+	if gamingSession.GameName == "" {
+		content = "## Ada info permainan hari ini? @here"
+	}
+	message := &discordgo.MessageSend{
+		Content: content,
+		Components: []discordgo.MessageComponent{
+			discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.Button{
+						Emoji: &discordgo.ComponentEmoji{
+							Name: "🔥",
+						},
+						Label:    "Gas!",
+						Style:    discordgo.PrimaryButton,
+						CustomID: "mabar_yes_" + id,
+					},
+					discordgo.Button{
+						Emoji: &discordgo.ComponentEmoji{
+							Name: "❌",
+						},
+						Label:    "Skip",
+						Style:    discordgo.SecondaryButton,
+						CustomID: "mabar_no",
+					},
+				},
+			},
+		},
+	}
+
+	res, err := b.dg.ChannelMessageSendComplex("1276782792876888075", message)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	return res, nil
 }

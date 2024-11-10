@@ -6,18 +6,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bismastr/discord-bot/components"
-	"github.com/bismastr/discord-bot/internal/session"
+	"github.com/bismastr/discord-bot/internal/bot/components"
+	"github.com/bismastr/discord-bot/internal/gamingSession"
 	"github.com/bismastr/discord-bot/utils"
 	"github.com/bwmarrin/discordgo"
 )
 
 type ActionHandlerCtrl struct {
-	gamingSessionService *session.GamingSessionService
+	gamingSessionService *gamingSession.GamingSessionService
 	ctx                  context.Context
 }
 
-func NewActionHandlerCtrl(gamingSessionService *session.GamingSessionService, ctx context.Context) *ActionHandlerCtrl {
+func NewActionHandlerCtrl(gamingSessionService *gamingSession.GamingSessionService, ctx context.Context) *ActionHandlerCtrl {
 	return &ActionHandlerCtrl{
 		gamingSessionService: gamingSessionService,
 		ctx:                  ctx,
@@ -44,7 +44,7 @@ func (a *ActionHandlerCtrl) JoinGamingSession(s *discordgo.Session, i *discordgo
 	}
 
 	//UpdateMember
-	updateMember := session.GamingSession{
+	updateMember := gamingSession.GamingSession{
 		MembersSession: append(currentRef.MembersSession, userid),
 	}
 	err = a.gamingSessionService.UpdateGamingSessionByRefId(a.ctx, refId, updateMember)
@@ -77,9 +77,9 @@ func (a *ActionHandlerCtrl) DeclineGamingSession(s *discordgo.Session, i *discor
 // After that, it will respond to user with a message that user create the gaming session.
 func (a *ActionHandlerCtrl) CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	gameName := []discordgo.PollAnswer{}
-	session := session.GamingSession{
+	session := gamingSession.GamingSession{
 		CreatedAt: time.Now().String(),
-		CreatedBy: &session.CreatedBy{
+		CreatedBy: &gamingSession.CreatedBy{
 			Id:       i.Member.User.ID,
 			Username: i.Member.Nick,
 		},
@@ -155,7 +155,7 @@ func (a *ActionHandlerCtrl) InitMabar(s *discordgo.Session, i *discordgo.Interac
 		}
 	}
 
-	updateGamingSession := session.GamingSession{
+	updateGamingSession := gamingSession.GamingSession{
 		GameName: gameName,
 	}
 

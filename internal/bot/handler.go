@@ -3,8 +3,7 @@ package bot
 import (
 	"context"
 
-	"github.com/bismastr/discord-bot/internal/handler/bot"
-	"github.com/bismastr/discord-bot/internal/session"
+	"github.com/bismastr/discord-bot/internal/gamingSession"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -14,8 +13,8 @@ func (b *Bot) RegisterHandler() {
 }
 
 func (b *Bot) interactionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	repository := session.NewRepositoryImpl(b.database)
-	h := bot.NewActionHandlerCtrl(session.NewGamingSessionService(repository), context.Background())
+	repository := gamingSession.NewRepositoryImpl(b.database)
+	h := NewActionHandlerCtrl(gamingSession.NewGamingSessionService(repository), context.Background())
 	var (
 		commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 			"create-mabar": h.CreateSession,
