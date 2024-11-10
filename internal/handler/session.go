@@ -1,17 +1,17 @@
-package rest
+package handler
 
 import (
 	"net/http"
 
-	"github.com/bismastr/discord-bot/internal/session"
+	"github.com/bismastr/discord-bot/internal/gamingSession"
 	"github.com/gin-gonic/gin"
 )
 
 type sessionCtrl struct {
-	sessionService *session.GamingSessionService
+	sessionService *gamingSession.GamingSessionService
 }
 
-func NewSessionCtrl(sessionService *session.GamingSessionService) *sessionCtrl {
+func NewSessionCtrl(sessionService *gamingSession.GamingSessionService) *sessionCtrl {
 	return &sessionCtrl{
 		sessionService: sessionService,
 	}
@@ -19,9 +19,9 @@ func NewSessionCtrl(sessionService *session.GamingSessionService) *sessionCtrl {
 
 func (s *sessionCtrl) CreateGamingSession(c *gin.Context) {
 
-	newGamingSession := session.GamingSession{
+	newGamingSession := gamingSession.GamingSession{
 		GameName: "mabar",
-		CreatedBy: &session.CreatedBy{
+		CreatedBy: &gamingSession.CreatedBy{
 			Id:       "1",
 			Username: "bismastr",
 		},
@@ -34,9 +34,9 @@ func (s *sessionCtrl) CreateGamingSession(c *gin.Context) {
 
 func (s *sessionCtrl) UpdateGamingSessionByRefId(c *gin.Context) {
 
-	newGamingSession := session.GamingSession{
+	newGamingSession := gamingSession.GamingSession{
 		GameName: "mabar 2 update testing2",
-		CreatedBy: &session.CreatedBy{
+		CreatedBy: &gamingSession.CreatedBy{
 			Id:       "1",
 			Username: "testupdate 1",
 		},

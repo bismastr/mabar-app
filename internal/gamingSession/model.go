@@ -1,4 +1,4 @@
-package session
+package gamingSession
 
 type GamingSession struct {
 	CreatedAt      string     `firestore:"created_at,omitempty" json:"created_at,omitempty"`

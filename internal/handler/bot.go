@@ -1,18 +1,19 @@
-package rest
+package handler
 
 import (
 	"net/http"
 
-	"github.com/bismastr/discord-bot/internal/session"
+	"github.com/bismastr/discord-bot/internal/bot"
+	"github.com/bismastr/discord-bot/internal/gamingSession"
 	"github.com/gin-gonic/gin"
 )
 
 type botCtrl struct {
-	botService     *session.BotGamingSessionService
-	sessionService *session.GamingSessionService
+	botService     *bot.BotGamingSessionService
+	sessionService *gamingSession.GamingSessionService
 }
 
-func NewBotCtrl(b *session.BotGamingSessionService, s *session.GamingSessionService) *botCtrl {
+func NewBotCtrl(b *bot.BotGamingSessionService, s *gamingSession.GamingSessionService) *botCtrl {
 	return &botCtrl{
 		botService:     b,
 		sessionService: s,
@@ -20,7 +21,7 @@ func NewBotCtrl(b *session.BotGamingSessionService, s *session.GamingSessionServ
 }
 
 func (b *botCtrl) CreateGamingSession(c *gin.Context) {
-	var newGamingSession session.GamingSession
+	var newGamingSession gamingSession.GamingSession
 
 	if err := c.BindJSON(&newGamingSession); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -34,7 +35,7 @@ func (b *botCtrl) CreateGamingSession(c *gin.Context) {
 		return
 	}
 
-	res, err := b.botService.CreateGamingSession(id, newGamingSession.GameName)
+	res, err := b.botService.CreateGamingSession(id, &newGamingSession)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
