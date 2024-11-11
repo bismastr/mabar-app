@@ -2,43 +2,51 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/bot"
+	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/bismastr/discord-bot/internal/database"
+	"github.com/bismastr/discord-bot/internal/gamingSession"
+	"github.com/bismastr/discord-bot/internal/handler"
 	"github.com/bismastr/discord-bot/internal/server"
 	"github.com/bwmarrin/discordgo"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	godotenv.Load()
 	ctx := context.Background()
 
-	dg, err := discordgo.New("Bot " + os.Getenv("DISCORD_BOT_TOKEN"))
-	if err != nil {
-		fmt.Println("error creating Discord session,", err)
-		return
-	}
+	serverFirebaseClient, _ := database.NewFirebaseClient(ctx) //Database init
 
-	//Start Database
-	serverFirebaseClient, _ := database.NewFirebaseClient(ctx)
-	//Start Bot
-	bot := bot.NewBot(dg, serverFirebaseClient)
-	bot.RegisterHandler()
-	bot.Open()
-	bot.AddAllCommand()
-	//Start Server
-	server := server.NewServer(gin.Default(), serverFirebaseClient, bot.Dg)
-	server.RegisterRoutes()
+	dg, _ := discordgo.New(config.Envs.DiscordBotToken)
+	discordBot := bot.NewBot(dg, serverFirebaseClient) //Discord bot init
+	discordBot.RegisterHandler()
+	discordBot.Open()
+	discordBot.AddAllCommand()
+
+	sessionStore := auth.NewSessionStore(auth.SessionOptions{
+		CookiesKey: config.Envs.CookiesAuthSecret,
+		MaxAge:     config.Envs.CookiesAuthAgeInSeconds,
+		Secure:     config.Envs.CookiesAuthIsSecure,
+		HttpOnly:   config.Envs.CookiesAuthIsHttpOnly,
+	}) //Session for auth
+
+	authService := auth.NewAuthService(sessionStore)                                                                     //Auth service
+	botService := bot.NewBotGamingSessionService(gamingSession.NewRepositoryImpl(serverFirebaseClient), discordBot.Dg)   //Bot service
+	gamingSessionService := gamingSession.NewGamingSessionService(gamingSession.NewRepositoryImpl(serverFirebaseClient)) //gaming session service
+
+	handler := handler.NewHandler(botService, gamingSessionService, authService)
+	server := server.NewServer(gin.Default(), serverFirebaseClient, discordBot.Dg) //Server
+	server.RegisterRoutes(handler)
 	server.Start()
 
 	exit(dg)
 	defer serverFirebaseClient.Client.Close()
+	defer dg.Close()
 }
 
 func exit(dg *discordgo.Session) {

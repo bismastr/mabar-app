@@ -6,12 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type healthCtrl struct{}
-
-func NewHealthCtrl() *healthCtrl {
-	return &healthCtrl{}
-}
-
-func (h *healthCtrl) Ping(c *gin.Context) {
+func (h *Handler) Ping(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "service ok"})
 }
