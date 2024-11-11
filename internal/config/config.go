@@ -28,7 +28,7 @@ func initConfig() Config {
 
 	return Config{
 		PublicHost:              getEnv("PUBLIC_HOST", "http:localhost"),
-		Port:                    getEnv("PORT", "8080"),
+		Port:                    getEnv("PORT", ":8080"),
 		CookiesAuthSecret:       getEnv("COOKIES_AUTH_SECRET", "some-very-secret-key"),
 		CookiesAuthAgeInSeconds: getEnvAsInt("COOKIES_AUTH_AGE_IN_SECONDS", 86400*30), // 30 days
 		CookiesAuthIsSecure:     getEnvAsBool("COOKIES_AUTH_IS_SECURE", false),

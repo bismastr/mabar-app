@@ -46,6 +46,7 @@ func main() {
 
 	exit(dg)
 	defer serverFirebaseClient.Client.Close()
+	defer dg.Close()
 }
 
 func exit(dg *discordgo.Session) {

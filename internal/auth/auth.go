@@ -69,5 +69,5 @@ func NewAuth() {
 }
 
 func buildCallbackURL(provider string) string {
-	return fmt.Sprintf("%s:%s/api/v1/auth/%s/callback", config.Envs.PublicHost, config.Envs.Port, provider)
+	return fmt.Sprintf("%s%s/api/v1/auth/%s/callback", config.Envs.PublicHost, config.Envs.Port, provider)
 }
