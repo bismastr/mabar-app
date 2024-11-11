@@ -2,10 +2,6 @@ package auth
 
 import "github.com/gorilla/sessions"
 
-const (
-	SessionName = "session"
-)
-
 type SessionOptions struct {
 	CookiesKey string
 	MaxAge     int

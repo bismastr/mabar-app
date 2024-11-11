@@ -2,6 +2,7 @@ package auth
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/bismastr/discord-bot/internal/config"
@@ -12,6 +13,10 @@ import (
 )
 
 type AuthService struct{}
+
+const (
+	SessionName = "user_session"
+)
 
 func NewAuthService(store sessions.Store) *AuthService {
 	gothic.Store = store
@@ -26,6 +31,19 @@ func NewAuthService(store sessions.Store) *AuthService {
 	)
 
 	return &AuthService{}
+}
+
+func (a *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, user goth.User) error {
+	session, _ := gothic.Store.Get(r, SessionName)
+
+	session.Values["user"] = user
+
+	err := session.Save(r, w)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewAuth() {

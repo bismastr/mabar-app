@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,14 +27,11 @@ func (h *Handler) Callback(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	//Store Session
-	session, _ := gothic.Store.Get(ctx.Request, "user_session")
 
-	session.Values["user"] = user
-
-	err = session.Save(ctx.Request, ctx.Writer)
+	err = h.auth.StoreUserSession(ctx.Writer, ctx.Request, user)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Fatalln(err)
+		return
 	}
 
 	sendSuccessResponse(ctx, user)
@@ -48,9 +45,7 @@ func (h *Handler) Login(ctx *gin.Context) {
 
 	if gothUser, err := gothic.CompleteUserAuth(ctx.Writer, ctx.Request); err == nil {
 		sendSuccessResponse(ctx, gothUser)
-		fmt.Println("err complete", err.Error())
 	} else {
-		fmt.Println("err complete userAuth", err.Error())
 		gothic.BeginAuthHandler(ctx.Writer, ctx.Request)
 	}
 }

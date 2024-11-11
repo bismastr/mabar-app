@@ -18,6 +18,7 @@ type Config struct {
 	CookiesAuthAgeInSeconds int
 	CookiesAuthIsSecure     bool
 	CookiesAuthIsHttpOnly   bool
+	SessionName             string
 }
 
 var Envs = initConfig()
@@ -35,6 +36,7 @@ func initConfig() Config {
 		DiscordClientID:         getEnvOrError("DISCORD_CLIENT_ID"),
 		DiscordClientSecret:     getEnvOrError("DISCORD_CLIENT_SECRET"),
 		DiscordBotToken:         getEnv("DISCORD_BOT_TOKEN", "token"),
+		SessionName:             getEnv("SESSION_NAME", "session_user"),
 	}
 }
 
