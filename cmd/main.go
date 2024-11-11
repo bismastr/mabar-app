@@ -22,7 +22,7 @@ func main() {
 
 	serverFirebaseClient, _ := database.NewFirebaseClient(ctx) //Database init
 
-	dg, _ := discordgo.New("Bot " + config.Envs.DiscordBotToken)
+	dg, _ := discordgo.New(config.Envs.DiscordBotToken)
 	discordBot := bot.NewBot(dg, serverFirebaseClient) //Discord bot init
 	discordBot.RegisterHandler()
 	discordBot.Open()

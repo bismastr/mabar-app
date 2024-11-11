@@ -2,7 +2,6 @@ package handler
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
@@ -20,11 +19,6 @@ func (h *Handler) Callback(ctx *gin.Context) {
 			"message": "Failed to authenticate",
 			"err":     err.Error(),
 		})
-		return
-	}
-
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

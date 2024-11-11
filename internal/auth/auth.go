@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -25,7 +26,7 @@ func NewAuthService(store sessions.Store) *AuthService {
 		discord.New(
 			config.Envs.DiscordClientID,
 			config.Envs.DiscordClientSecret,
-			"http://localhost:8080/api/v1/auth/discord/callback",
+			buildCallbackURL("discord"),
 			discord.ScopeIdentify,
 			discord.ScopeEmail),
 	)
@@ -65,4 +66,8 @@ func NewAuth() {
 	goth.UseProviders(
 		discord.New(discordKey, discordSecret, "http://localhost:8080/api/v1/auth/discord/callback", discord.ScopeIdentify, discord.ScopeEmail),
 	)
+}
+
+func buildCallbackURL(provider string) string {
+	return fmt.Sprintf("%s:%s/api/v1/auth/%s/callback", config.Envs.PublicHost, config.Envs.Port, provider)
 }

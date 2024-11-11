@@ -35,7 +35,7 @@ func initConfig() Config {
 		CookiesAuthIsHttpOnly:   getEnvAsBool("COOKIES_AUTH_IS_HTTP_ONLY", false),
 		DiscordClientID:         getEnvOrError("DISCORD_CLIENT_ID"),
 		DiscordClientSecret:     getEnvOrError("DISCORD_CLIENT_SECRET"),
-		DiscordBotToken:         getEnv("DISCORD_BOT_TOKEN", "token"),
+		DiscordBotToken:         fmt.Sprintf("Bot %v", getEnv("DISCORD_BOT_TOKEN", "token")),
 		SessionName:             getEnv("SESSION_NAME", "session_user"),
 	}
 }
