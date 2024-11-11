@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	Env                     string
 	PublicHost              string
 	Port                    string
 	DiscordBotToken         string
@@ -27,6 +28,7 @@ func initConfig() Config {
 	godotenv.Load()
 
 	return Config{
+		Env:                     getEnv("ENV", "dev"),
 		PublicHost:              getEnv("PUBLIC_HOST", "http:localhost"),
 		Port:                    getEnv("PORT", ":8080"),
 		CookiesAuthSecret:       getEnv("COOKIES_AUTH_SECRET", "some-very-secret-key"),
