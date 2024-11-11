@@ -2,14 +2,31 @@ package auth
 
 import (
 	"log"
-	"net/http"
 	"os"
 
+	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/discord"
 )
+
+type AuthService struct{}
+
+func NewAuthService(store sessions.Store) *AuthService {
+	gothic.Store = store
+
+	goth.UseProviders(
+		discord.New(
+			config.Envs.DiscordClientID,
+			config.Envs.DiscordClientSecret,
+			"http://localhost:8080/api/v1/auth/discord/callback",
+			discord.ScopeIdentify,
+			discord.ScopeEmail),
+	)
+
+	return &AuthService{}
+}
 
 func NewAuth() {
 	sessionSecret := os.Getenv("SESSION_SECRET")
@@ -17,13 +34,7 @@ func NewAuth() {
 		log.Fatal("SESSION_SECRET environment variable is not set")
 	}
 
-	store := sessions.NewCookieStore([]byte(sessionSecret))
-	store.MaxAge(86400 * 30)
-
-	store.Options.HttpOnly = true
-	store.Options.Path = "/"
-	store.Options.Secure = false
-	store.Options.SameSite = http.SameSiteLaxMode
+	var store = sessions.NewCookieStore([]byte(sessionSecret))
 
 	gothic.Store = store
 
