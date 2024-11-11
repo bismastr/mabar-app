@@ -64,7 +64,7 @@ func NewAuth() {
 	}
 
 	goth.UseProviders(
-		discord.New(discordKey, discordSecret, "http://localhost:8080/api/v1/auth/discord/callback", discord.ScopeIdentify, discord.ScopeEmail),
+		discord.New(discordKey, discordSecret, buildCallbackURL("discord"), discord.ScopeIdentify, discord.ScopeEmail),
 	)
 }
 
