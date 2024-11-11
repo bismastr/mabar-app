@@ -20,7 +20,7 @@ func NewBotGamingSessionService(repo gamingSession.FirestoreRepositorySession, d
 }
 
 func (b *BotGamingSessionService) CreateGamingSession(id string, gamingSession *gamingSession.GamingSession) (*discordgo.Message, error) {
-	content := fmt.Sprintf("## Ada info %s hari ini? @here \n created by @%s", gamingSession.GameName, gamingSession.CreatedBy.Username)
+	content := fmt.Sprintf("## Ada info %s hari ini? @here \n created by <@%s>", gamingSession.GameName, gamingSession.CreatedBy.Id)
 	if gamingSession.GameName == "" {
 		content = "## Ada info permainan hari ini? @here"
 	}
