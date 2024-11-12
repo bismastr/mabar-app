@@ -2,9 +2,7 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/gorilla/sessions"
@@ -30,7 +28,6 @@ func NewAuthService(store sessions.Store) *AuthService {
 			discord.ScopeIdentify,
 			discord.ScopeEmail),
 	)
-
 	return &AuthService{}
 }
 
@@ -45,27 +42,6 @@ func (a *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, u
 	}
 
 	return nil
-}
-
-func NewAuth() {
-	sessionSecret := os.Getenv("SESSION_SECRET")
-	if sessionSecret == "" {
-		log.Fatal("SESSION_SECRET environment variable is not set")
-	}
-
-	var store = sessions.NewCookieStore([]byte(sessionSecret))
-
-	gothic.Store = store
-
-	discordKey := os.Getenv("DISCORD_KEY")
-	discordSecret := os.Getenv("DISCORD_SECRET")
-	if discordKey == "" || discordSecret == "" {
-		log.Fatal("DISCORD_KEY or DISCORD_SECRET environment variables are not set")
-	}
-
-	goth.UseProviders(
-		discord.New(discordKey, discordSecret, buildCallbackURL("discord"), discord.ScopeIdentify, discord.ScopeEmail),
-	)
 }
 
 func buildCallbackURL(provider string) string {
