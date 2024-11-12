@@ -10,7 +10,7 @@ type SessionOptions struct {
 }
 
 func NewSessionStore(opts SessionOptions) *sessions.CookieStore {
-	store := sessions.NewCookieStore([]byte(opts.CookiesKey))
+	var store = sessions.NewCookieStore([]byte(opts.CookiesKey))
 
 	store.MaxAge(opts.MaxAge)
 	store.Options.Path = "/"

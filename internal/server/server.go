@@ -1,7 +1,6 @@
 package server
 
 import (
-	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/bismastr/discord-bot/internal/database"
 	"github.com/bwmarrin/discordgo"
@@ -23,7 +22,5 @@ func NewServer(e *gin.Engine, db *database.DbClient, dg *discordgo.Session) *Ser
 }
 
 func (s *Server) Start() error {
-	auth.NewAuth()
-
 	return s.router.Run(config.Envs.Port)
 }
