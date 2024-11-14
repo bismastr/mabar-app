@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"log"
+	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
@@ -24,11 +25,11 @@ func (h *Handler) Callback(ctx *gin.Context) {
 
 	err = h.auth.StoreUserSession(ctx.Writer, ctx.Request, user)
 	if err != nil {
-		log.Fatalln(err)
+		ctx.AbortWithError(500, err)
 		return
 	}
 
-	sendSuccessResponse(ctx, user)
+	ctx.Redirect(http.StatusTemporaryRedirect, "http://localhost:5173")
 }
 
 func (h *Handler) Login(ctx *gin.Context) {
@@ -39,9 +40,20 @@ func (h *Handler) Login(ctx *gin.Context) {
 
 	if gothUser, err := gothic.CompleteUserAuth(ctx.Writer, ctx.Request); err == nil {
 		sendSuccessResponse(ctx, gothUser)
+
 	} else {
+		fmt.Println("not found sesson")
 		gothic.BeginAuthHandler(ctx.Writer, ctx.Request)
 	}
+}
+
+func (h *Handler) CheckIsAuthenticaed(ctx *gin.Context) {
+	u, err := h.auth.GetUserSession(ctx.Writer, ctx.Request)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"err": err})
+	}
+
+	ctx.JSON(http.StatusOK, u)
 }
 
 func sendSuccessResponse(ctx *gin.Context, user interface{}) {

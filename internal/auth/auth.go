@@ -14,7 +14,7 @@ import (
 type AuthService struct{}
 
 const (
-	SessionName = "user_session"
+	SessionName = "_user_session"
 )
 
 func NewAuthService(store sessions.Store) *AuthService {
@@ -42,6 +42,20 @@ func (a *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, u
 	}
 
 	return nil
+}
+
+func (a *AuthService) GetUserSession(w http.ResponseWriter, r *http.Request) (goth.User, error) {
+	session, err := gothic.Store.Get(r, SessionName)
+	if err != nil {
+		return goth.User{}, err
+	}
+
+	u := session.Values["user"]
+	if u == nil {
+		return goth.User{}, fmt.Errorf("user is not authenticated! %v", u)
+	}
+
+	return u.(goth.User), nil
 }
 
 func buildCallbackURL(provider string) string {
