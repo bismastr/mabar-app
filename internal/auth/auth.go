@@ -47,7 +47,7 @@ func (a *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, u
 func (a *AuthService) GetUserSession(w http.ResponseWriter, r *http.Request) (goth.User, error) {
 	session, err := gothic.Store.Get(r, SessionName)
 	if err != nil {
-		return goth.User{}, err
+		return goth.User{}, fmt.Errorf("please login")
 	}
 
 	u := session.Values["user"]

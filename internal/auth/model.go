@@ -1,7 +1,7 @@
 package auth
 
 type User struct {
-	Name      string
-	AvatarURL string
-	UserID    string
+	Name      string `json:"name"`
+	AvatarURL string `json:"avatar_url"`
+	UserID    string `json:"user_id"`
 }

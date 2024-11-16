@@ -51,7 +51,8 @@ func (h *Handler) Login(ctx *gin.Context) {
 func (h *Handler) CheckIsAuthenticaed(ctx *gin.Context) {
 	u, err := h.auth.GetUserSession(ctx.Writer, ctx.Request)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"err": err})
+		ctx.JSON(http.StatusOK, auth.User{})
+		return
 	}
 
 	user := &auth.User{
