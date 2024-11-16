@@ -18,7 +18,7 @@ type Server struct {
 
 func NewServer(e *gin.Engine, db *database.DbClient, dg *discordgo.Session) *Server {
 	e.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:8080", "http://localhost:5173", "https://mabar.bism.app"},
+		AllowOrigins:     []string{"http://localhost:8080", "http://localhost:5173", "https://mabar.bism.app", "https://app-mabar.bism.app"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
