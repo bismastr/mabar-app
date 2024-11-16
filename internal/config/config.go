@@ -20,6 +20,7 @@ type Config struct {
 	CookiesAuthIsSecure     bool
 	CookiesAuthIsHttpOnly   bool
 	SessionName             string
+	CallbackRedirectUrl     string
 }
 
 var Envs = initConfig()
@@ -39,6 +40,7 @@ func initConfig() Config {
 		DiscordClientSecret:     getEnvOrError("DISCORD_CLIENT_SECRET"),
 		DiscordBotToken:         fmt.Sprintf("Bot %v", getEnv("DISCORD_BOT_TOKEN", "token")),
 		SessionName:             getEnv("SESSION_NAME", "session_user"),
+		CallbackRedirectUrl:     getEnv("CALLBACK_URL", "http://localhost:5173"),
 	}
 }
 
