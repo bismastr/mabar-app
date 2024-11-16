@@ -8,6 +8,7 @@ require (
 	cloud.google.com/go/firestore v1.17.0
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/bwmarrin/discordgo v0.28.2-0.20240729124523-41a66e5f151f
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gorilla/sessions v1.4.0
 	github.com/joho/godotenv v1.5.1
