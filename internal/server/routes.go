@@ -26,6 +26,6 @@ func (s *Server) authRoutes(api *gin.RouterGroup, h *handler.Handler) {
 	{
 		authRoutes.GET("/:provider/callback", h.Callback)
 		authRoutes.GET("/:provider", h.Login)
-		authRoutes.GET("/check", h.CheckIsAuthenticaed)
+		authRoutes.GET("/profile", h.CheckIsAuthenticaed)
 	}
 }

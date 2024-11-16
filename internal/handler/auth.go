@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
 )
@@ -53,7 +54,13 @@ func (h *Handler) CheckIsAuthenticaed(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"err": err})
 	}
 
-	ctx.JSON(http.StatusOK, u)
+	user := &auth.User{
+		Name:      u.Name,
+		UserID:    u.UserID,
+		AvatarURL: u.AvatarURL,
+	}
+
+	ctx.JSON(http.StatusOK, user)
 }
 
 func sendSuccessResponse(ctx *gin.Context, user interface{}) {
