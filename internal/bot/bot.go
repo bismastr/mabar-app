@@ -20,9 +20,9 @@ func NewBotGamingSessionService(repo gamingSession.FirestoreRepositorySession, d
 }
 
 func (b *BotGamingSessionService) CreateGamingSession(id string, gamingSession *gamingSession.GamingSession) (*discordgo.Message, error) {
-	content := fmt.Sprintf("## Ada info %s hari ini? @here \n created by <@%s>", gamingSession.GameName, gamingSession.CreatedBy.Id)
+	content := fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\n%s \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> MABAR ᴄʀᴇᴀᴛᴇᴅ ʙʏ <@%s>", gamingSession.GameName, gamingSession.CreatedBy.Id)
 	if gamingSession.GameName == "" {
-		content = "## Ada info permainan hari ini? @here"
+		content = fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\nBebas Asal Sopan \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> MABAR ᴄʀᴇᴀᴛᴇᴅ ʙʏ <@%s>", gamingSession.CreatedBy.Id)
 	}
 	message := &discordgo.MessageSend{
 		Content: content,
