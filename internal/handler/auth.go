@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/bismastr/discord-bot/internal/auth"
+	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
 )
@@ -30,8 +31,7 @@ func (h *Handler) Callback(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
-	// ctx.Redirect(http.StatusTemporaryRedirect, config.Envs.CallbackRedirectUrl)
+	ctx.Redirect(http.StatusTemporaryRedirect, config.Envs.CallbackRedirectUrl)
 }
 
 func (h *Handler) Login(ctx *gin.Context) {
