@@ -24,6 +24,14 @@ func (h *Handler) Callback(ctx *gin.Context) {
 		return
 	}
 
+	_, err = h.user.Createuser(&user)
+	if err != nil {
+		ctx.JSON(500, gin.H{
+			"message": "Failed to authenticate",
+			"err":     err.Error(),
+		})
+	}
+
 	err = h.auth.StoreUserSession(ctx.Writer, ctx.Request, user)
 	if err != nil {
 		ctx.AbortWithError(500, err)

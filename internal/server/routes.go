@@ -8,8 +8,10 @@ import (
 func (s *Server) RegisterRoutes(h *handler.Handler) {
 	apiV1 := s.router.Group("api/v1")
 
+	s.gamingSessionRoutes(apiV1, h)
 	s.botGamingSessionRoutes(apiV1, h)
 	s.authRoutes(apiV1, h)
+
 }
 
 func (s *Server) botGamingSessionRoutes(api *gin.RouterGroup, h *handler.Handler) {
@@ -17,6 +19,13 @@ func (s *Server) botGamingSessionRoutes(api *gin.RouterGroup, h *handler.Handler
 
 	{
 		botRoutes.POST("/create", h.CreateGamingSession)
+	}
+}
+func (s *Server) gamingSessionRoutes(api *gin.RouterGroup, h *handler.Handler) {
+	gamingRoutes := api.Group("/gaming-session")
+
+	{
+		gamingRoutes.POST("/create", h.CreateSession)
 	}
 }
 

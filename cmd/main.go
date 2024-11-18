@@ -10,15 +10,23 @@ import (
 	"github.com/bismastr/discord-bot/internal/bot"
 	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/bismastr/discord-bot/internal/database"
+	"github.com/bismastr/discord-bot/internal/db"
 	"github.com/bismastr/discord-bot/internal/gamingSession"
+	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
 	"github.com/bismastr/discord-bot/internal/server"
+	"github.com/bismastr/discord-bot/internal/user"
 	"github.com/bwmarrin/discordgo"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	ctx := context.Background()
+
+	db, err := db.NewDatabase()
+	if err != nil {
+		panic(err)
+	}
 
 	serverFirebaseClient, _ := database.NewFirebaseClient(ctx) //Database init
 
@@ -35,12 +43,15 @@ func main() {
 		HttpOnly:   config.Envs.CookiesAuthIsHttpOnly,
 	}) //Session for auth
 
+	//Init all service
 	authService := auth.NewAuthService(sessionStore)                                                                     //Auth service
 	botService := bot.NewBotGamingSessionService(gamingSession.NewRepositoryImpl(serverFirebaseClient), discordBot.Dg)   //Bot service
 	gamingSessionService := gamingSession.NewGamingSessionService(gamingSession.NewRepositoryImpl(serverFirebaseClient)) //gaming session service
-
-	handler := handler.NewHandler(botService, gamingSessionService, authService)
-	server := server.NewServer(gin.Default(), serverFirebaseClient, discordBot.Dg) //Server
+	userService := user.NewUserService(user.NewUserRepositoryImpl(db))
+	gamingService := gaming_session.NewGamingService(gaming_session.NewGamingSessionRepository(db))
+	//Start server
+	handler := handler.NewHandler(botService, gamingSessionService, authService, userService, gamingService)
+	server := server.NewServer(gin.Default(), serverFirebaseClient, discordBot.Dg)
 	server.RegisterRoutes(handler)
 	server.Start()
 
