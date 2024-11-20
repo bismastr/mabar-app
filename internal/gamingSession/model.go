@@ -8,6 +8,7 @@ type GamingSession struct {
 	MembersSession []string   `firestore:"members_sessions,omitempty" json:"members_sessions,omitempty"`
 	GameName       string     `firestore:"game_name,omitempty" json:"game_name,omitempty"`
 	IsFinish       bool       `json:"is_finish,omitempty"`
+	ChannelId      string     `json:"channel_id,omitempty"`
 }
 
 type CreatedBy struct {

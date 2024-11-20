@@ -25,7 +25,7 @@ func NewActionHandlerCtrl(gamingSessionService *gamingSession.GamingSessionServi
 
 // JoinGamingSession is a function to handle user who join the gaming session.
 // This function will check is user already in session or not. If not, then it will update the gaming session.
-// After that, it will respond to user with a message that user join the gaming session.
+// After that, it will respond to user with a message that user join the gaming sessions.
 func (a *ActionHandlerCtrl) JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	//GetUserId and Refid
 	userid := i.Member.User.ID
