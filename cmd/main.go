@@ -12,6 +12,7 @@ import (
 	"github.com/bismastr/discord-bot/internal/database"
 	"github.com/bismastr/discord-bot/internal/db"
 	"github.com/bismastr/discord-bot/internal/gamingSession"
+	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
 	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/bismastr/discord-bot/internal/server"
@@ -49,8 +50,9 @@ func main() {
 	botService := bot.NewBotGamingSessionService(gamingSession.NewRepositoryImpl(serverFirebaseClient), discordBot.Dg)   //Bot service
 	gamingSessionService := gamingSession.NewGamingSessionService(gamingSession.NewRepositoryImpl(serverFirebaseClient)) //gaming session service
 	userService := user.NewUserService(repository)
+	gaming_session := gaming_session.NewGamingSessionService(repository)
 	//Start server
-	handler := handler.NewHandler(botService, gamingSessionService, authService, userService)
+	handler := handler.NewHandler(botService, gamingSessionService, authService, userService, gaming_session)
 	server := server.NewServer(gin.Default(), serverFirebaseClient, discordBot.Dg)
 	server.RegisterRoutes(handler)
 	server.Start()

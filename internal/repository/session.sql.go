@@ -43,24 +43,92 @@ func (q *Queries) GetAllSession(ctx context.Context) ([]Session, error) {
 	return items, nil
 }
 
-const getSessionById = `-- name: GetSessionById :one
-SELECT id, is_finish, session_end, session_start, created_by, game_id FROM sessions 
-WHERE id = $1
-LIMIT 1
+const getSessionById = `-- name: GetSessionById :many
+SELECT 
+    s.id AS session_id,
+    s.is_finish,
+    s.session_end,
+    s.session_start,
+    s.created_by,
+    s.game_id,
+    u.id AS user_id,
+    u.username,
+    u.avatar_url,
+    u.discord_uid,
+	g.game_name,
+	g.game_icon_url,
+	c.id AS created_by_user_id,
+	c.username AS created_by_username,
+	c.avatar_url AS created_by_avatar_url,
+	c.discord_uid AS created_by_discord_uid
+FROM 
+    sessions s
+LEFT JOIN
+    games g ON s.game_id = g.id
+LEFT JOIN
+	users c on s.created_by = c.id
+LEFT JOIN 
+    users_session us ON s.id = us.session_id
+LEFT JOIN 
+    users u ON us.user_id = u.id
+WHERE 
+    s.id = $1
 `
 
-func (q *Queries) GetSessionById(ctx context.Context, id int64) (Session, error) {
-	row := q.db.QueryRow(ctx, getSessionById, id)
-	var i Session
-	err := row.Scan(
-		&i.ID,
-		&i.IsFinish,
-		&i.SessionEnd,
-		&i.SessionStart,
-		&i.CreatedBy,
-		&i.GameID,
-	)
-	return i, err
+type GetSessionByIdRow struct {
+	SessionID           int64
+	IsFinish            pgtype.Bool
+	SessionEnd          pgtype.Timestamp
+	SessionStart        pgtype.Timestamp
+	CreatedBy           int64
+	GameID              int64
+	UserID              pgtype.Int8
+	Username            pgtype.Text
+	AvatarUrl           pgtype.Text
+	DiscordUid          pgtype.Int8
+	GameName            pgtype.Text
+	GameIconUrl         pgtype.Text
+	CreatedByUserID     pgtype.Int8
+	CreatedByUsername   pgtype.Text
+	CreatedByAvatarUrl  pgtype.Text
+	CreatedByDiscordUid pgtype.Int8
+}
+
+func (q *Queries) GetSessionById(ctx context.Context, id int64) ([]GetSessionByIdRow, error) {
+	rows, err := q.db.Query(ctx, getSessionById, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSessionByIdRow
+	for rows.Next() {
+		var i GetSessionByIdRow
+		if err := rows.Scan(
+			&i.SessionID,
+			&i.IsFinish,
+			&i.SessionEnd,
+			&i.SessionStart,
+			&i.CreatedBy,
+			&i.GameID,
+			&i.UserID,
+			&i.Username,
+			&i.AvatarUrl,
+			&i.DiscordUid,
+			&i.GameName,
+			&i.GameIconUrl,
+			&i.CreatedByUserID,
+			&i.CreatedByUsername,
+			&i.CreatedByAvatarUrl,
+			&i.CreatedByDiscordUid,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const insertGamingSession = `-- name: InsertGamingSession :one

@@ -4,20 +4,28 @@ import (
 	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/bot"
 	"github.com/bismastr/discord-bot/internal/gamingSession"
+	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/user"
 )
 
 type Handler struct {
-	bot           *bot.BotGamingSessionService
-	gamingSession *gamingSession.GamingSessionService
-	auth          *auth.AuthService
-	user          *user.UserService
+	bot            *bot.BotGamingSessionService
+	gamingSession  *gamingSession.GamingSessionService
+	auth           *auth.AuthService
+	user           *user.UserService
+	gaming_session *gaming_session.GamingSessionService
 }
 
-func NewHandler(bot *bot.BotGamingSessionService, gamingSession *gamingSession.GamingSessionService, auth *auth.AuthService, user *user.UserService) *Handler {
+func NewHandler(
+	bot *bot.BotGamingSessionService,
+	gamingSession *gamingSession.GamingSessionService,
+	auth *auth.AuthService,
+	user *user.UserService,
+	gaming_session *gaming_session.GamingSessionService) *Handler {
 	return &Handler{
-		bot:  bot,
-		auth: auth,
-		user: user,
+		bot:            bot,
+		auth:           auth,
+		user:           user,
+		gaming_session: gaming_session,
 	}
 }
