@@ -22,11 +22,7 @@ func (s *Server) botGamingSessionRoutes(api *gin.RouterGroup, h *handler.Handler
 	}
 }
 func (s *Server) gamingSessionRoutes(api *gin.RouterGroup, h *handler.Handler) {
-	gamingRoutes := api.Group("/gaming-session")
 
-	{
-		gamingRoutes.POST("/create", h.CreateSession)
-	}
 }
 
 func (s *Server) authRoutes(api *gin.RouterGroup, h *handler.Handler) {

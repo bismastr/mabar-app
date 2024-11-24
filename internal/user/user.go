@@ -1,42 +1,35 @@
 package user
 
 import (
+	"context"
 	"strconv"
 
-	"github.com/bismastr/discord-bot/internal/model"
+	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/markbates/goth"
 )
 
 type UserService struct {
-	userRepository *UserRepositoryImpl
+	repository *repository.Queries
 }
 
-func NewUserService(userRepository *UserRepositoryImpl) *UserService {
+func NewUserService(repository *repository.Queries) *UserService {
 	return &UserService{
-		userRepository: userRepository,
+		repository: repository,
 	}
 }
 
-func (u *UserService) Createuser(user *goth.User) (*model.User, error) {
+func (u *UserService) Createuser(ctx context.Context, user *goth.User) error {
 	discordId, _ := strconv.Atoi(user.UserID)
-	userConverted := &model.User{
-		DiscordUID: discordId,
+	userConverted := repository.InsertUserParams{
 		Username:   user.Name,
-		AvatarURL:  user.AvatarURL,
+		AvatarUrl:  user.AvatarURL,
+		DiscordUid: int64(discordId),
 	}
 
-	result, err := u.userRepository.CreateUser(userConverted)
+	err := u.repository.InsertUser(ctx, userConverted)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return result, nil
-}
-
-func (u *UserService) GetUserByDiscordId(discordId int) (*model.User, error) {
-	result, err := u.userRepository.GetUserByDiscordId(discordId)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	return nil
 }

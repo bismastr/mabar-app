@@ -1,16 +1,15 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"os"
 
-	"github.com/bismastr/discord-bot/internal/model"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/jackc/pgx/v5"
 )
 
 type Db struct {
-	Client *gorm.DB
+	Conn *pgx.Conn
 }
 
 func NewDatabase() (*Db, error) {
@@ -20,12 +19,10 @@ func NewDatabase() (*Db, error) {
 	dbHost := os.Getenv(("DB_HOST"))
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", dbHost, dbUser, dbPassword, dbName, "5432")
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	conn, err := pgx.Connect(context.Background(), dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	db.AutoMigrate(&model.User{}, &model.Game{}, &model.Session{})
-
-	return &Db{Client: db}, nil
+	return &Db{Conn: conn}, nil
 }
