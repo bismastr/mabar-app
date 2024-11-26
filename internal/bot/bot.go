@@ -50,7 +50,7 @@ func (b *BotGamingSessionService) CreateGamingSession(id string, gamingSession *
 		},
 	}
 
-	res, err := b.dg.ChannelMessageSendComplex("1276782792876888075", message)
+	res, err := b.dg.ChannelMessageSendComplex(gamingSession.ChannelId, message)
 	if err != nil {
 		return nil, err
 	}
