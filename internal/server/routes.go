@@ -27,6 +27,7 @@ func (s *Server) gamingSessionRoutes(api *gin.RouterGroup, h *handler.Handler) {
 		gamingSessionRoutes.POST("/create", h.CreateGamingSessionV2)
 		gamingSessionRoutes.POST("/join", h.JoinGamingSession)
 		gamingSessionRoutes.GET("/:id", h.GetGamingSession)
+		gamingSessionRoutes.GET("/", h.GetAllGamingSessions)
 	}
 }
 

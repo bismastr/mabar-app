@@ -33,7 +33,7 @@ func (g *GamingSessionService) CreateGamingSession(ctx context.Context, gamingSe
 	return &result, nil
 }
 
-func (g *GamingSessionService) GetGamingSessionById(ctx context.Context, id int64) (*GetGamingSessionByIdResponse, error) {
+func (g *GamingSessionService) GetGamingSessionById(ctx context.Context, id int64) (*GetGamingSessionResponse, error) {
 	result, err := g.repository.GetSessionById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -43,17 +43,21 @@ func (g *GamingSessionService) GetGamingSessionById(ctx context.Context, id int6
 		return nil, errors.New("cannot find session")
 	}
 
-	response := GetGamingSessionByIdResponse{
+	response := GetGamingSessionResponse{
 		SessionID:    result[0].SessionID,
 		IsFinish:     result[0].IsFinish,
 		SessionEnd:   result[0].SessionEnd,
 		SessionStart: result[0].SessionStart,
-		GameID:       result[0].GameID,
 		CreatedBy: GamingSessionUser{
 			UserID:     result[0].CreatedByUserID,
 			DiscordUid: result[0].CreatedByDiscordUid,
 			AvatarUrl:  result[0].CreatedByAvatarUrl,
 			Username:   result[0].CreatedByUsername,
+		},
+		Game: GamingSessionGame{
+			GameId:      result[0].GameID,
+			GameName:    result[0].GameName,
+			GameIconUrl: result[0].GameIconUrl,
 		},
 	}
 
@@ -69,13 +73,46 @@ func (g *GamingSessionService) GetGamingSessionById(ctx context.Context, id int6
 	return &response, nil
 }
 
-func (g *GamingSessionService) GetAllGamingSessions(ctx context.Context) (*[]repository.Session, error) {
-	result, err := g.repository.GetAllSession(ctx)
+func (g *GamingSessionService) GetAllGamingSessions(ctx context.Context) (*[]GetGamingSessionResponse, error) {
+	rows, err := g.repository.GetAllSessions(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &result, nil
+	var response []GetGamingSessionResponse
+	for _, row := range rows {
+		if len(response) < 1 || row.SessionID != response[len(response)-1].SessionID {
+			response = append(response, GetGamingSessionResponse{
+				SessionID:    row.SessionID,
+				IsFinish:     row.IsFinish,
+				SessionEnd:   row.SessionEnd,
+				SessionStart: row.SessionStart,
+				CreatedBy: GamingSessionUser{
+					UserID:     row.CreatedByUserID,
+					DiscordUid: row.CreatedByDiscordUid,
+					AvatarUrl:  row.CreatedByAvatarUrl,
+					Username:   row.CreatedByUsername,
+				},
+				Game: GamingSessionGame{
+					GameId:      row.GameID,
+					GameName:    row.GameName,
+					GameIconUrl: row.GameIconUrl,
+				},
+			})
+
+		}
+
+		if row.UserID.Valid {
+			response[len(response)-1].Users = append(response[len(response)-1].Users, GamingSessionUser{
+				UserID:     row.UserID,
+				DiscordUid: row.DiscordUid,
+				AvatarUrl:  row.AvatarUrl,
+				Username:   row.Username,
+			})
+		}
+	}
+
+	return &response, nil
 }
 
 func (g *GamingSessionService) InsertUserJoinSession(ctx context.Context, userId int64, sessionId int64) error {
