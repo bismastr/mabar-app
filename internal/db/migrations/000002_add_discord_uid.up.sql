@@ -1,0 +1,1 @@
+ALTER TABLE users ADD CONSTRAINT unique_discord_uid UNIQUE (discord_uid);

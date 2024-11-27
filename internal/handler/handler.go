@@ -9,7 +9,7 @@ import (
 )
 
 type Handler struct {
-	bot            *bot.BotGamingSessionService
+	bot            *bot.BotService
 	gamingSession  *gamingSession.GamingSessionService
 	auth           *auth.AuthService
 	user           *user.UserService
@@ -17,7 +17,7 @@ type Handler struct {
 }
 
 func NewHandler(
-	bot *bot.BotGamingSessionService,
+	bot *bot.BotService,
 	gamingSession *gamingSession.GamingSessionService,
 	auth *auth.AuthService,
 	user *user.UserService,

@@ -3,8 +3,11 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/bismastr/discord-bot/internal/auth"
+	"github.com/bismastr/discord-bot/internal/config"
+	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
 )
@@ -24,7 +27,13 @@ func (h *Handler) Callback(ctx *gin.Context) {
 		return
 	}
 
-	err = h.user.Createuser(ctx, &user)
+	discordUid, _ := strconv.ParseInt(user.UserID, 10, 64)
+	err = h.user.Createuser(ctx, repository.InsertUserParams{
+		Username:   user.Name,
+		AvatarUrl:  user.AvatarURL,
+		DiscordUid: discordUid,
+	})
+
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"message": "Failed to authenticate",
@@ -38,10 +47,7 @@ func (h *Handler) Callback(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "success authentication",
-	})
-	// ctx.Redirect(http.StatusTemporaryRedirect, config.Envs.CallbackRedirectUrl)
+	ctx.Redirect(http.StatusTemporaryRedirect, config.Envs.CallbackRedirectUrl)
 }
 
 func (h *Handler) Login(ctx *gin.Context) {

@@ -73,8 +73,13 @@ func (g *GamingSessionService) GetGamingSessionById(ctx context.Context, id int6
 	return &response, nil
 }
 
-func (g *GamingSessionService) GetAllGamingSessions(ctx context.Context) (*[]GetGamingSessionResponse, error) {
-	rows, err := g.repository.GetAllSessions(ctx)
+func (g *GamingSessionService) GetAllGamingSessions(ctx context.Context, req *GetAllGamingSessionRequest) (*[]GetGamingSessionResponse, error) {
+	offset := req.Page * req.Rows
+	rows, err := g.repository.GetAllSessions(ctx, repository.GetAllSessionsParams{
+		Limit:  int32(req.Rows),
+		Offset: int32(offset),
+	})
+
 	if err != nil {
 		return nil, err
 	}

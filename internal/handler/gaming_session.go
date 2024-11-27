@@ -66,7 +66,14 @@ func (h *Handler) GetGamingSession(c *gin.Context) {
 }
 
 func (h *Handler) GetAllGamingSessions(c *gin.Context) {
-	result, err := h.gaming_session.GetAllGamingSessions(c)
+	var req *gaming_session.GetAllGamingSessionRequest
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err,
+		})
+		return
+	}
+	result, err := h.gaming_session.GetAllGamingSessions(c, req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),

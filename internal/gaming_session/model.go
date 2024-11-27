@@ -11,6 +11,7 @@ type CreateGamingSessionRequest struct {
 	SessionStart pgtype.Timestamp `json:"session_start"`
 	CreatedBy    int64            `json:"created_by"`
 	GameID       int64            `json:"game_id"`
+	ChannelID    string           `json:"channel_id"`
 }
 
 // JoinGamingSession
@@ -41,4 +42,9 @@ type GamingSessionGame struct {
 	GameId      int64       `json:"id"`
 	GameName    pgtype.Text `json:"name"`
 	GameIconUrl pgtype.Text `json:"icon_url"`
+}
+
+type GetAllGamingSessionRequest struct {
+	Page int `json:"page"`
+	Rows int `json:"rows"`
 }

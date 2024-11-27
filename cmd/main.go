@@ -34,9 +34,6 @@ func main() {
 
 	dg, _ := discordgo.New(config.Envs.DiscordBotToken)
 	discordBot := bot.NewBot(dg, serverFirebaseClient) //Discord bot init
-	discordBot.RegisterHandler()
-	discordBot.Open()
-	discordBot.AddAllCommand()
 
 	sessionStore := auth.NewSessionStore(auth.SessionOptions{
 		CookiesKey: config.Envs.CookiesAuthSecret,
@@ -46,11 +43,18 @@ func main() {
 	}) //Session for auth
 
 	//Init all service
+	gaming_session := gaming_session.NewGamingSessionService(repository)
 	authService := auth.NewAuthService(sessionStore)                                                                     //Auth service
-	botService := bot.NewBotGamingSessionService(gamingSession.NewRepositoryImpl(serverFirebaseClient), discordBot.Dg)   //Bot service
+	botService := bot.NewBotService(discordBot.Dg)                                                                       //Bot service
 	gamingSessionService := gamingSession.NewGamingSessionService(gamingSession.NewRepositoryImpl(serverFirebaseClient)) //gaming session service
 	userService := user.NewUserService(repository)
-	gaming_session := gaming_session.NewGamingSessionService(repository)
+
+	//Start Discord
+	botHandler := bot.NewActionHandlerCtrl(gamingSessionService, userService, gaming_session, context.Background())
+	discordBot.RegisterHandler(botHandler)
+	discordBot.Open()
+	discordBot.AddAllCommand()
+
 	//Start server
 	handler := handler.NewHandler(botService, gamingSessionService, authService, userService, gaming_session)
 	server := server.NewServer(gin.Default(), serverFirebaseClient, discordBot.Dg)

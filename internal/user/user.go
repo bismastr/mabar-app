@@ -2,10 +2,8 @@ package user
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/bismastr/discord-bot/internal/repository"
-	"github.com/markbates/goth"
 )
 
 type UserService struct {
@@ -18,18 +16,20 @@ func NewUserService(repository *repository.Queries) *UserService {
 	}
 }
 
-func (u *UserService) Createuser(ctx context.Context, user *goth.User) error {
-	discordId, _ := strconv.Atoi(user.UserID)
-	userConverted := repository.InsertUserParams{
-		Username:   user.Name,
-		AvatarUrl:  user.AvatarURL,
-		DiscordUid: int64(discordId),
-	}
-
-	err := u.repository.InsertUser(ctx, userConverted)
+func (u *UserService) Createuser(ctx context.Context, user repository.InsertUserParams) error {
+	err := u.repository.InsertUser(ctx, user)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (u *UserService) GetUserByDiscordUID(ctx context.Context, dicord_uid int64) (*repository.User, error) {
+	result, err := u.repository.GetUserByDiscordUID(ctx, dicord_uid)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }

@@ -67,4 +67,5 @@ LEFT JOIN
 LEFT JOIN 
     users u ON us.user_id = u.id
 ORDER BY 
-    s.id;
+    s.id
+LIMIT $1 OFFSET $2;

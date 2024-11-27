@@ -3,27 +3,28 @@ package bot
 import (
 	"fmt"
 
-	"github.com/bismastr/discord-bot/internal/gamingSession"
+	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bwmarrin/discordgo"
 )
 
-type BotGamingSessionService struct {
-	repository gamingSession.FirestoreRepositorySession
-	dg         *discordgo.Session
+type BotService struct {
+	dg *discordgo.Session
 }
 
-func NewBotGamingSessionService(repo gamingSession.FirestoreRepositorySession, dg *discordgo.Session) *BotGamingSessionService {
-	return &BotGamingSessionService{
-		repository: repo,
-		dg:         dg,
+func NewBotService(dg *discordgo.Session) *BotService {
+	return &BotService{
+		dg: dg,
 	}
 }
 
-func (b *BotGamingSessionService) CreateGamingSession(id string, gamingSession *gamingSession.GamingSession) (*discordgo.Message, error) {
-	content := fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\n%s \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> MABAR ᴄʀᴇᴀᴛᴇᴅ ʙʏ <@%s>\n> Try mabar website: [Mabar Website](https://mabar.bism.app/)", gamingSession.GameName, gamingSession.CreatedBy.Id)
-	if gamingSession.GameName == "" {
-		content = fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\nBebas Asal Sopan \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> MABAR ᴄʀᴇᴀᴛᴇᴅ ʙʏ <@%s>\n> Try mabar website: [Mabar Website](https://mabar.bism.app/)", gamingSession.CreatedBy.Id)
+func (b *BotService) CreateGamingSession(gamingSession *gaming_session.GetGamingSessionResponse, channelId string) (*discordgo.Message, error) {
+	content := fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\n%s \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> MABAR ᴄʀᴇᴀᴛᴇᴅ ʙʏ <@%d>\n> Try mabar website: [Mabar Website](https://mabar.bism.app/)", gamingSession.Game.GameName.String, gamingSession.CreatedBy.DiscordUid.Int64)
+	if gamingSession.Game.GameName.String == "" {
+		content = fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\nBebas Asal Sopan \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> MABAR ᴄʀᴇᴀᴛᴇᴅ ʙʏ <@%d>\n> Try mabar website: [Mabar Website](https://mabar.bism.app/)", gamingSession.CreatedBy.UserID.Int64)
 	}
+
+	customId := fmt.Sprintf("mabarv2_yes_%d", gamingSession.SessionID)
+
 	message := &discordgo.MessageSend{
 		Content: content,
 		Components: []discordgo.MessageComponent{
@@ -35,7 +36,7 @@ func (b *BotGamingSessionService) CreateGamingSession(id string, gamingSession *
 						},
 						Label:    "Gas!",
 						Style:    discordgo.PrimaryButton,
-						CustomID: "mabar_yes_" + id,
+						CustomID: customId,
 					},
 					discordgo.Button{
 						Emoji: &discordgo.ComponentEmoji{
@@ -50,7 +51,7 @@ func (b *BotGamingSessionService) CreateGamingSession(id string, gamingSession *
 		},
 	}
 
-	res, err := b.dg.ChannelMessageSendComplex(gamingSession.ChannelId, message)
+	res, err := b.dg.ChannelMessageSendComplex(channelId, message)
 	if err != nil {
 		return nil, err
 	}

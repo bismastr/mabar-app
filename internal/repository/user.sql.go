@@ -9,6 +9,23 @@ import (
 	"context"
 )
 
+const getUserByDiscordUID = `-- name: GetUserByDiscordUID :one
+SELECT id, username, avatar_url, discord_uid FROM users
+WHERE discord_uid = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserByDiscordUID(ctx context.Context, discordUid int64) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByDiscordUID, discordUid)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.AvatarUrl,
+		&i.DiscordUid,
+	)
+	return i, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
 SELECT id, username, avatar_url, discord_uid FROM users
 WHERE id = $1 LIMIT 1
@@ -32,6 +49,9 @@ INSERT INTO users (
     avatar_url,
     discord_uid
 ) VALUES ( $1, $2, $3)
+ON CONFLICT (discord_uid) DO UPDATE SET
+username = EXCLUDED.username,
+avatar_url = EXCLUDED.avatar_url
 `
 
 type InsertUserParams struct {

@@ -41,7 +41,13 @@ LEFT JOIN
     users u ON us.user_id = u.id
 ORDER BY 
     s.id
+LIMIT $1 OFFSET $2
 `
+
+type GetAllSessionsParams struct {
+	Limit  int32
+	Offset int32
+}
 
 type GetAllSessionsRow struct {
 	SessionID           int64
@@ -62,8 +68,8 @@ type GetAllSessionsRow struct {
 	CreatedByDiscordUid pgtype.Int8
 }
 
-func (q *Queries) GetAllSessions(ctx context.Context) ([]GetAllSessionsRow, error) {
-	rows, err := q.db.Query(ctx, getAllSessions)
+func (q *Queries) GetAllSessions(ctx context.Context, arg GetAllSessionsParams) ([]GetAllSessionsRow, error) {
+	rows, err := q.db.Query(ctx, getAllSessions, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
