@@ -1,29 +1,25 @@
 package bot
 
 import (
-	"context"
-
-	"github.com/bismastr/discord-bot/internal/gamingSession"
 	"github.com/bwmarrin/discordgo"
 )
 
-func (b *Bot) RegisterHandler() {
-	//Action Handler
-	b.Dg.AddHandler(b.interactionHandler)
+func (b *Bot) RegisterHandler(h *ActionHandlerCtrl) {
+	b.Dg.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		b.interactionHandler(h, s, i)
+	})
 }
 
-func (b *Bot) interactionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	repository := gamingSession.NewRepositoryImpl(b.database)
-	h := NewActionHandlerCtrl(gamingSession.NewGamingSessionService(repository), context.Background())
+func (b *Bot) interactionHandler(h *ActionHandlerCtrl, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var (
 		commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 			"create-mabar": h.CreateSession,
-			// "list-mabar":   ListSession,
 		}
 		componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-			"mabar_yes":  h.JoinGamingSession,
-			"mabar_no":   h.DeclineGamingSession,
-			"init_mabar": h.InitMabar,
+			"mabar_yes":   h.JoinGamingSession,
+			"mabar_no":    h.DeclineGamingSession,
+			"init_mabar":  h.InitMabar,
+			"mabarv2_yes": h.JoinGamingSessionV2,
 		}
 	)
 

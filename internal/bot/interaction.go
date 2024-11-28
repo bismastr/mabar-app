@@ -3,36 +3,45 @@ package bot
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/bismastr/discord-bot/internal/bot/components"
+	"github.com/bismastr/discord-bot/internal/bot/components/message_components"
 	"github.com/bismastr/discord-bot/internal/gamingSession"
+	"github.com/bismastr/discord-bot/internal/gaming_session"
+	"github.com/bismastr/discord-bot/internal/user"
 	"github.com/bwmarrin/discordgo"
+	"github.com/jackc/pgx/v5"
 )
 
 type ActionHandlerCtrl struct {
 	gamingSessionService *gamingSession.GamingSessionService
+	userService          *user.UserService
+	gamingSession        *gaming_session.GamingSessionService
 	ctx                  context.Context
 }
 
-func NewActionHandlerCtrl(gamingSessionService *gamingSession.GamingSessionService, ctx context.Context) *ActionHandlerCtrl {
+func NewActionHandlerCtrl(
+	gamingSessionService *gamingSession.GamingSessionService,
+	userService *user.UserService,
+	gamingSession *gaming_session.GamingSessionService,
+	ctx context.Context) *ActionHandlerCtrl {
 	return &ActionHandlerCtrl{
 		gamingSessionService: gamingSessionService,
+		userService:          userService,
+		gamingSession:        gamingSession,
 		ctx:                  ctx,
 	}
 }
 
-// JoinGamingSession is a function to handle user who join the gaming session.
-// This function will check is user already in session or not. If not, then it will update the gaming session.
-// After that, it will respond to user with a message that user join the gaming sessions.
 func (a *ActionHandlerCtrl) JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	//GetUserId and Refid
 	userid := i.Member.User.ID
 	customId := i.MessageComponentData().CustomID
 	split := strings.Split(customId, "_")
 	refId := split[2]
-	//GetCurrentGamingSession
+
 	currentRef, err := a.gamingSessionService.GetGamingSessionByRefId(a.ctx, refId)
 	if err != nil {
 		panic(err)
@@ -42,7 +51,6 @@ func (a *ActionHandlerCtrl) JoinGamingSession(s *discordgo.Session, i *discordgo
 		return
 	}
 
-	//UpdateMember
 	updateMember := gamingSession.GamingSession{
 		MembersSession: append(currentRef.MembersSession, userid),
 	}
@@ -54,8 +62,35 @@ func (a *ActionHandlerCtrl) JoinGamingSession(s *discordgo.Session, i *discordgo
 	components.JoinSession(s, i, userid, GenerateMemberMention(updateMember.MembersSession))
 }
 
-// DeclineGamingSession is a function to handle user who decline the gaming session.
-// This function will respond to user with a message that user decline the gaming session.
+func (a *ActionHandlerCtrl) JoinGamingSessionV2(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	userId, _ := strconv.ParseInt(i.Member.User.ID, 10, 64)
+	customId := i.MessageComponentData().CustomID
+	split := strings.Split(customId, "_")
+	id, _ := strconv.ParseInt(split[2], 10, 64)
+
+	user, err := a.userService.GetUserByDiscordUID(a.ctx, userId)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			message_components.NeedLoginMessage(s, i)
+		} else {
+			message_components.ErrorMessage(s, i)
+		}
+		return
+	}
+
+	err = a.gamingSession.InsertUserJoinSession(a.ctx, user.ID, id)
+	if err != nil {
+		message_components.ErrorMessage(s, i)
+	}
+
+	response, err := a.gamingSession.GetGamingSessionById(a.ctx, id)
+	if err != nil {
+		message_components.ErrorMessage(s, i)
+	}
+
+	message_components.JoinSessionV2(s, i, userId, response)
+}
+
 func (a *ActionHandlerCtrl) DeclineGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	userid := i.Member.User.ID
 	noJoin := fmt.Sprintf("<@%v> tidak join duls, kecewaaaa sangat berat!", userid)
@@ -71,9 +106,6 @@ func (a *ActionHandlerCtrl) DeclineGamingSession(s *discordgo.Session, i *discor
 	}
 }
 
-// CreateSession is a function to handle user who create the gaming session.
-// This function will check is user already in session or not. If not, then it will create the gaming session.
-// After that, it will respond to user with a message that user create the gaming session.
 func (a *ActionHandlerCtrl) CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	gameName := []discordgo.PollAnswer{}
 	session := gamingSession.GamingSession{
@@ -96,9 +128,7 @@ func (a *ActionHandlerCtrl) CreateSession(s *discordgo.Session, i *discordgo.Int
 			})
 		}
 	}
-	//
 
-	//Switch
 	var gameText string
 	switch len(gameName) {
 	case 1:
@@ -126,7 +156,6 @@ func (a *ActionHandlerCtrl) CreateSession(s *discordgo.Session, i *discordgo.Int
 }
 
 func (a *ActionHandlerCtrl) InitMabar(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	//RefId
 	customId := i.MessageComponentData().CustomID
 	split := strings.Split(customId, "_")
 	refId := split[2]
