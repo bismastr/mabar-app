@@ -21,7 +21,7 @@ func (h *Handler) Callback(ctx *gin.Context) {
 	user, err := gothic.CompleteUserAuth(ctx.Writer, ctx.Request)
 	if err != nil {
 		ctx.JSON(500, gin.H{
-			"message": "Failed to authenticate",
+			"message": "Failed to authenticate complete user auth",
 			"err":     err.Error(),
 		})
 		return
@@ -36,7 +36,7 @@ func (h *Handler) Callback(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(500, gin.H{
-			"message": "Failed to authenticate",
+			"message": "Failed to create user to db",
 			"err":     err.Error(),
 		})
 	}
