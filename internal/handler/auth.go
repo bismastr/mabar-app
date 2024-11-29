@@ -71,13 +71,16 @@ func (h *Handler) CheckIsAuthenticaed(ctx *gin.Context) {
 		return
 	}
 
-	user := &auth.User{
-		Name:      u.Name,
-		UserID:    u.UserID,
-		AvatarURL: u.AvatarURL,
+	userId, _ := strconv.ParseInt(u.UserID, 10, 64)
+	result, err := h.user.GetUserByDiscordUID(ctx, userId)
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{
+			"message": err,
+		})
+		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, result)
 }
 
 func sendSuccessResponse(ctx *gin.Context, user interface{}) {
