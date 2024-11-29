@@ -58,7 +58,6 @@ func (h *Handler) Login(ctx *gin.Context) {
 
 	if gothUser, err := gothic.CompleteUserAuth(ctx.Writer, ctx.Request); err == nil {
 		sendSuccessResponse(ctx, gothUser)
-
 	} else {
 		fmt.Println("not found sesson")
 		gothic.BeginAuthHandler(ctx.Writer, ctx.Request)
