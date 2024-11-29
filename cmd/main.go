@@ -28,6 +28,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer db.Conn.Close(ctx)
 	repository := repository.New(db.Conn)
 
 	serverFirebaseClient, _ := database.NewFirebaseClient(ctx) //Database init
