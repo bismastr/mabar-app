@@ -83,6 +83,22 @@ func (h *Handler) CheckIsAuthenticaed(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
+func (h *Handler) GetUserByDiscordUIDs(ctx *gin.Context) {
+	id := ctx.Param("id")
+	fmt.Println(id)
+
+	idInt, _ := strconv.ParseInt(id, 10, 64)
+	result, err := h.user.GetUserByDiscordUID(ctx, idInt)
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{
+			"message": err,
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result)
+}
+
 func sendSuccessResponse(ctx *gin.Context, user interface{}) {
 	ctx.JSON(200, gin.H{
 		"message": "Successfully authenticated",
