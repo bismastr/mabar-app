@@ -83,3 +83,15 @@ func (h *Handler) GetAllGamingSessions(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
+
+func (h *Handler) GetAllGames(c *gin.Context) {
+	result, err := h.gaming_session.GetAllGames(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}

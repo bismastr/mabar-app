@@ -48,3 +48,9 @@ type GetAllGamingSessionRequest struct {
 	Page int `json:"page"`
 	Rows int `json:"rows"`
 }
+
+type GetAllGamesResponse struct {
+	ID          int64
+	GameName    string
+	GameIconUrl string
+}

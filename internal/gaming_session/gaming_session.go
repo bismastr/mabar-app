@@ -132,3 +132,12 @@ func (g *GamingSessionService) InsertUserJoinSession(ctx context.Context, userId
 
 	return nil
 }
+
+func (g *GamingSessionService) GetAllGames(ctx context.Context) (*[]repository.Game, error) {
+	row, err := g.repository.GetGameList(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &row, nil
+}

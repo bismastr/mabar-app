@@ -10,7 +10,6 @@ import (
 
 type Handler struct {
 	bot            *bot.BotService
-	gamingSession  *gamingSession.GamingSessionService
 	auth           *auth.AuthService
 	user           *user.UserService
 	gaming_session *gaming_session.GamingSessionService
