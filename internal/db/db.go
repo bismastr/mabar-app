@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Db struct {
-	Conn *pgx.Conn
+	Conn *pgxpool.Pool
 }
 
 func NewDatabase() (*Db, error) {
@@ -19,10 +20,21 @@ func NewDatabase() (*Db, error) {
 	dbHost := os.Getenv(("DB_HOST"))
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", dbHost, dbUser, dbPassword, dbName, "5432")
 
-	conn, err := pgx.Connect(context.Background(), dsn)
+	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Db{Conn: conn}, nil
+	config.MaxConns = 25
+	config.MaxConnIdleTime = 5 * time.Minute
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	pool, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create connection pool: %v", err)
+	}
+
+	return &Db{Conn: pool}, nil
 }
