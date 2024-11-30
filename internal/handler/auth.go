@@ -47,10 +47,6 @@ func (h *Handler) Callback(ctx *gin.Context) {
 		return
 	}
 
-	// ctx.JSON(200, gin.H{
-	// 	"message": "Successfully authenticated",
-	// 	"user":    user,
-	// })
 	ctx.Redirect(http.StatusTemporaryRedirect, config.Envs.CallbackRedirectUrl)
 }
 
