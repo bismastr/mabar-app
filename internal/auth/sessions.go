@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/gorilla/sessions"
 )
 
@@ -18,7 +19,7 @@ func NewSessionStore(opts SessionOptions) *sessions.CookieStore {
 	store.Options.Path = "/"
 	store.Options.HttpOnly = opts.HttpOnly
 	store.Options.Secure = opts.Secure
-	store.Options.Domain = ".bism.app"
+	store.Options.Domain = config.Envs.CookiesDomain
 
 	return store
 }
