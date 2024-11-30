@@ -21,6 +21,7 @@ type Config struct {
 	CookiesAuthIsHttpOnly   bool
 	SessionName             string
 	CallbackRedirectUrl     string
+	CookiesDomain           string
 }
 
 var Envs = initConfig()
@@ -41,6 +42,7 @@ func initConfig() Config {
 		DiscordBotToken:         fmt.Sprintf("Bot %v", getEnv("DISCORD_BOT_TOKEN", "token")),
 		SessionName:             getEnv("SESSION_NAME", "session_user"),
 		CallbackRedirectUrl:     getEnv("CALLBACK_URL", "http://localhost:5173"),
+		CookiesDomain:           getEnv("COOKIES_DOMAIN_NAME", "http://mabar.bism.app"),
 	}
 }
 
