@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/bismastr/discord-bot/internal/repository"
+	"github.com/bismastr/discord-bot/internal/user"
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 )
 
@@ -64,14 +65,20 @@ func (h *Handler) Login(ctx *gin.Context) {
 	}
 }
 
-func (h *Handler) CheckIsAuthenticaed(ctx *gin.Context) {
-	u, err := h.auth.GetUserSession(ctx.Writer, ctx.Request)
-	if err != nil {
-		ctx.JSON(http.StatusOK, auth.User{})
+func (h *Handler) Profile(ctx *gin.Context) {
+	u, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "User not authenticated"})
 		return
 	}
 
-	userId, _ := strconv.ParseInt(u.UserID, 10, 64)
+	gothUser, ok := u.(goth.User)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "User type assertion failed"})
+		return
+	}
+
+	userId, _ := strconv.ParseInt(gothUser.UserID, 10, 64)
 	result, err := h.user.GetUserByDiscordUID(ctx, userId)
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{
@@ -80,7 +87,12 @@ func (h *Handler) CheckIsAuthenticaed(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, user.User{
+		Name:       result.Username,
+		AvatarURL:  result.AvatarUrl,
+		ID:         result.ID,
+		DiscordUID: result.DiscordUid,
+	})
 }
 
 func (h *Handler) GetUserByDiscordUIDs(ctx *gin.Context) {

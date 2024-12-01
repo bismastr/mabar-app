@@ -2,15 +2,25 @@ package server
 
 import (
 	"github.com/bismastr/discord-bot/internal/handler"
+	"github.com/bismastr/discord-bot/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func (s *Server) RegisterRoutes(h *handler.Handler) {
 	apiV1 := s.router.Group("api/v1")
+	apiV1.Use(middleware.SessionMiddleware())
 
 	s.gamingSessionRoutes(apiV1, h)
 	s.botGamingSessionRoutes(apiV1, h)
 	s.authRoutes(apiV1, h)
+	s.metricsRoutes(apiV1, h)
+}
+
+func (s *Server) metricsRoutes(api *gin.RouterGroup, h *handler.Handler) {
+	metricsRoutes := api.Group("/metrics")
+	{
+		metricsRoutes.GET("/", h.Prometheus)
+	}
 }
 
 func (s *Server) botGamingSessionRoutes(api *gin.RouterGroup, h *handler.Handler) {
@@ -38,7 +48,7 @@ func (s *Server) authRoutes(api *gin.RouterGroup, h *handler.Handler) {
 	{
 		authRoutes.GET("/:provider/callback", h.Callback)
 		authRoutes.GET("/:provider", h.Login)
-		authRoutes.GET("/profile", h.CheckIsAuthenticaed)
-		authRoutes.GET("/profile/:id", h.GetUserByDiscordUIDs)
+
+		authRoutes.GET("/profile", h.Profile)
 	}
 }
