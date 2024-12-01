@@ -49,8 +49,9 @@ type GetAllGamingSessionRequest struct {
 	Rows int `json:"rows"`
 }
 
+// Games
 type GetAllGamesResponse struct {
-	ID          int64
-	GameName    string
-	GameIconUrl string
+	ID          int64  `json:"id"`
+	GameName    string `json:"game_name"`
+	GameIconUrl string `json:"game_icon_url"`
 }
