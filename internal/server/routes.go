@@ -8,7 +8,6 @@ import (
 
 func (s *Server) RegisterRoutes(h *handler.Handler) {
 	apiV1 := s.router.Group("api/v1")
-	apiV1.Use(middleware.SessionMiddleware())
 
 	s.gamingSessionRoutes(apiV1, h)
 	s.botGamingSessionRoutes(apiV1, h)
@@ -38,7 +37,7 @@ func (s *Server) gamingSessionRoutes(api *gin.RouterGroup, h *handler.Handler) {
 		gamingSessionRoutes.POST("/create", h.CreateGamingSessionV2)
 		gamingSessionRoutes.POST("/join", h.JoinGamingSession)
 		gamingSessionRoutes.GET("/:id", h.GetGamingSession)
-		gamingSessionRoutes.GET("/", h.GetAllGamingSessions)
+		gamingSessionRoutes.GET("", h.GetAllGamingSessions)
 	}
 }
 
@@ -48,7 +47,6 @@ func (s *Server) authRoutes(api *gin.RouterGroup, h *handler.Handler) {
 	{
 		authRoutes.GET("/:provider/callback", h.Callback)
 		authRoutes.GET("/:provider", h.Login)
-
-		authRoutes.GET("/profile", h.Profile)
+		authRoutes.GET("/profile", h.Profile).Use(middleware.SessionMiddleware())
 	}
 }
