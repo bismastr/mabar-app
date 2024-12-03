@@ -66,14 +66,27 @@ func (h *Handler) GetGamingSession(c *gin.Context) {
 }
 
 func (h *Handler) GetAllGamingSessions(c *gin.Context) {
-	var req *gaming_session.GetAllGamingSessionRequest
-	if err := c.BindJSON(&req); err != nil {
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err,
 		})
 		return
 	}
-	result, err := h.gaming_session.GetAllGamingSessions(c, req)
+
+	rows, err := strconv.Atoi(c.DefaultQuery("rows", "16"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err,
+		})
+		return
+	}
+	req := gaming_session.GetAllGamingSessionRequest{
+		Page: page,
+		Rows: rows,
+	}
+
+	result, err := h.gaming_session.GetAllGamingSessions(c, &req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
