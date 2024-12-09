@@ -5,61 +5,33 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/bismastr/discord-bot/internal/bot/components"
 	"github.com/bismastr/discord-bot/internal/bot/components/message_components"
-	"github.com/bismastr/discord-bot/internal/gamingSession"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/user"
 	"github.com/bwmarrin/discordgo"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type ActionHandlerCtrl struct {
-	gamingSessionService *gamingSession.GamingSessionService
-	userService          *user.UserService
-	gamingSession        *gaming_session.GamingSessionService
-	ctx                  context.Context
+	userService   *user.UserService
+	gamingSession *gaming_session.GamingSessionService
+	BotService    *BotService
+	ctx           context.Context
 }
 
 func NewActionHandlerCtrl(
-	gamingSessionService *gamingSession.GamingSessionService,
 	userService *user.UserService,
 	gamingSession *gaming_session.GamingSessionService,
+	botService *BotService,
 	ctx context.Context) *ActionHandlerCtrl {
 	return &ActionHandlerCtrl{
-		gamingSessionService: gamingSessionService,
-		userService:          userService,
-		gamingSession:        gamingSession,
-		ctx:                  ctx,
+		userService:   userService,
+		gamingSession: gamingSession,
+		BotService:    botService,
+		ctx:           ctx,
 	}
-}
-
-func (a *ActionHandlerCtrl) JoinGamingSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	userid := i.Member.User.ID
-	customId := i.MessageComponentData().CustomID
-	split := strings.Split(customId, "_")
-	refId := split[2]
-
-	currentRef, err := a.gamingSessionService.GetGamingSessionByRefId(a.ctx, refId)
-	if err != nil {
-		panic(err)
-	}
-
-	if IsInSession(currentRef, userid, s, i) {
-		return
-	}
-
-	updateMember := gamingSession.GamingSession{
-		MembersSession: append(currentRef.MembersSession, userid),
-	}
-	err = a.gamingSessionService.UpdateGamingSessionByRefId(a.ctx, refId, updateMember)
-	if err != nil {
-		panic(err)
-	}
-
-	components.JoinSession(s, i, userid, GenerateMemberMention(updateMember.MembersSession))
 }
 
 func (a *ActionHandlerCtrl) JoinGamingSessionV2(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -106,96 +78,38 @@ func (a *ActionHandlerCtrl) DeclineGamingSession(s *discordgo.Session, i *discor
 	}
 }
 
-func (a *ActionHandlerCtrl) CreateSession(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	gameName := []discordgo.PollAnswer{}
-	session := gamingSession.GamingSession{
-		CreatedAt: time.Now().String(),
-		CreatedBy: &gamingSession.CreatedBy{
-			Id:       i.Member.User.ID,
-			Username: i.Member.Nick,
-		},
-		SessionEnd:   "", //Need to add session
-		SessionStart: "",
-		IsFinish:     false,
-	}
+func (a *ActionHandlerCtrl) CreateMabar(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	userId, _ := strconv.ParseInt(i.Member.User.ID, 10, 64)
 
-	for _, v := range i.ApplicationCommandData().Options {
-		if v.StringValue() != "" {
-			gameName = append(gameName, discordgo.PollAnswer{
-				Media: &discordgo.PollMedia{
-					Text: v.StringValue(),
-				},
-			})
-		}
-	}
-
-	var gameText string
-	switch len(gameName) {
-	case 1:
-		gameText = gameName[0].Media.Text
-		session.GameName = gameText
-		id, err := a.gamingSessionService.CreateGamingSession(a.ctx, session)
-		if err != nil {
-			panic(err)
-		}
-		components.CreateSession(s, i, id, gameText)
-	case 0:
-		session.GameName = ""
-		id, err := a.gamingSessionService.CreateGamingSession(a.ctx, session)
-		if err != nil {
-			panic(err)
-		}
-		components.CreateSession(s, i, id, "")
-	default:
-		id, err := a.gamingSessionService.CreateGamingSession(a.ctx, session)
-		if err != nil {
-			panic(err)
-		}
-		components.CreateSessionPoll(s, i, gameName, id)
-	}
-}
-
-func (a *ActionHandlerCtrl) InitMabar(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	customId := i.MessageComponentData().CustomID
-	split := strings.Split(customId, "_")
-	refId := split[2]
-
-	currentRef, err := a.gamingSessionService.GetGamingSessionByRefId(a.ctx, refId)
+	user, err := a.userService.GetUserByDiscordUID(a.ctx, userId)
 	if err != nil {
-		panic(err)
-	}
-
-	if currentRef.CreatedBy.Id != i.Member.User.ID {
-		components.UnableCreateSession(s, i)
+		if err == pgx.ErrNoRows {
+			message_components.NeedLoginMessage(s, i)
+		} else {
+			message_components.ErrorMessage(s, i)
+		}
 		return
 	}
 
-	m, _ := s.PollExpire(i.ChannelID, i.Message.ID)
-
-	var userWinning []*discordgo.User
-	var gameName string
-	for _, v := range m.Poll.Answers {
-		user, _ := s.PollAnswerVoters(i.ChannelID, i.Message.ID, v.AnswerID)
-
-		if len(user) > len(userWinning) {
-			userWinning = user
-			gameName = v.Media.Text
-		}
-	}
-
-	updateGamingSession := gamingSession.GamingSession{
-		GameName: gameName,
-	}
-
-	for _, v := range userWinning {
-		updateGamingSession.MembersSession = append(updateGamingSession.MembersSession, v.ID)
-	}
-
-	err = a.gamingSessionService.UpdateGamingSessionByRefId(a.ctx, refId, updateGamingSession)
+	createSession, err := a.gamingSession.CreateGamingSession(a.ctx, &gaming_session.CreateGamingSessionRequest{
+		IsFinish: pgtype.Bool{
+			Bool:  false,
+			Valid: true,
+		},
+		CreatedBy: user.ID,
+		GameID:    i.ApplicationCommandData().Options[0].IntValue(),
+	})
 	if err != nil {
-		panic(err)
+		message_components.ErrorMessage(s, i)
 	}
 
-	components.InitMabar(s, i, gameName, GenerateMemberMention(updateGamingSession.MembersSession))
-	defer s.ChannelMessageDelete(i.ChannelID, i.Message.ID)
+	session, err := a.gamingSession.GetGamingSessionById(a.ctx, createSession.ID)
+	if err != nil {
+		message_components.ErrorMessage(s, i)
+	}
+
+	_, err = a.BotService.CreateGamingSession(session, i.ChannelID)
+	if err != nil {
+		message_components.ErrorMessage(s, i)
+	}
 }

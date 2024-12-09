@@ -9,9 +9,7 @@ import (
 	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/bot"
 	"github.com/bismastr/discord-bot/internal/config"
-	"github.com/bismastr/discord-bot/internal/database"
 	"github.com/bismastr/discord-bot/internal/db"
-	"github.com/bismastr/discord-bot/internal/gamingSession"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
 	"github.com/bismastr/discord-bot/internal/repository"
@@ -22,7 +20,6 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
 
 	db, err := db.NewDatabase()
 	if err != nil {
@@ -32,10 +29,8 @@ func main() {
 
 	repository := repository.New(db.Conn)
 
-	serverFirebaseClient, _ := database.NewFirebaseClient(ctx) //Database init
-
 	dg, _ := discordgo.New(config.Envs.DiscordBotToken)
-	discordBot := bot.NewBot(dg, serverFirebaseClient) //Discord bot init
+	discordBot := bot.NewBot(dg) //Discord bot init
 
 	sessionStore := auth.NewSessionStore(auth.SessionOptions{
 		CookiesKey: config.Envs.CookiesAuthSecret,
@@ -46,25 +41,23 @@ func main() {
 
 	//Init all service
 	gaming_session := gaming_session.NewGamingSessionService(repository)
-	authService := auth.NewAuthService(sessionStore)                                                                     //Auth service
-	botService := bot.NewBotService(discordBot.Dg)                                                                       //Bot service
-	gamingSessionService := gamingSession.NewGamingSessionService(gamingSession.NewRepositoryImpl(serverFirebaseClient)) //gaming session service
+	authService := auth.NewAuthService(sessionStore)
+	botService := bot.NewBotService(discordBot.Dg)
 	userService := user.NewUserService(repository)
 
 	//Start Discord
-	botHandler := bot.NewActionHandlerCtrl(gamingSessionService, userService, gaming_session, context.Background())
+	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, context.Background())
 	discordBot.RegisterHandler(botHandler)
 	discordBot.Open()
 	discordBot.AddAllCommand()
 
 	//Start server
-	handler := handler.NewHandler(botService, gamingSessionService, authService, userService, gaming_session)
-	server := server.NewServer(gin.Default(), serverFirebaseClient, discordBot.Dg)
+	handler := handler.NewHandler(botService, authService, userService, gaming_session)
+	server := server.NewServer(gin.Default(), discordBot.Dg)
 	server.RegisterRoutes(handler)
 	server.Start()
 
 	exit(dg)
-	defer serverFirebaseClient.Client.Close()
 	defer dg.Close()
 }
 

@@ -13,12 +13,10 @@ func (b *Bot) RegisterHandler(h *ActionHandlerCtrl) {
 func (b *Bot) interactionHandler(h *ActionHandlerCtrl, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var (
 		commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-			"create-mabar": h.CreateSession,
+			"create-mabar": h.CreateMabar,
 		}
 		componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-			"mabar_yes":   h.JoinGamingSession,
 			"mabar_no":    h.DeclineGamingSession,
-			"init_mabar":  h.InitMabar,
 			"mabarv2_yes": h.JoinGamingSessionV2,
 		}
 	)
