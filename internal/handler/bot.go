@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/bismastr/discord-bot/internal/gaming_session"
@@ -27,8 +26,6 @@ func (h *Handler) CreateGamingSession(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
-
-	fmt.Println(newGamingSession.ChannelID)
 
 	res, err := h.bot.CreateGamingSession(response, newGamingSession.ChannelID)
 	if err != nil {

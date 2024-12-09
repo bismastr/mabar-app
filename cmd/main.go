@@ -52,7 +52,7 @@ func main() {
 	userService := user.NewUserService(repository)
 
 	//Start Discord
-	botHandler := bot.NewActionHandlerCtrl(gamingSessionService, userService, gaming_session, context.Background())
+	botHandler := bot.NewActionHandlerCtrl(gamingSessionService, userService, gaming_session, botService, context.Background())
 	discordBot.RegisterHandler(botHandler)
 	discordBot.Open()
 	discordBot.AddAllCommand()

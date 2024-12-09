@@ -11,31 +11,27 @@ var (
 	commands = []*discordgo.ApplicationCommand{
 		{
 			Name:        "create-mabar",
-			Description: "Buat sesi mabar baru. Kamu bisa tambahkan nama permainan/game (opsional)",
+			Description: "Buat sesi mabar baru",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "game-name-1",
-					Description: "Nama Permainan/Game",
-					Required:    false,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "game-name-2",
-					Description: "Nama Permainan/Game",
-					Required:    false,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "game-name-3",
-					Description: "Nama Permainan/Game",
-					Required:    false,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "game-name-4",
-					Description: "Nama Permainan/Game",
-					Required:    false,
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Name:        "game_name",
+					Description: "Choose your game",
+					Required:    true,
+					Choices: []*discordgo.ApplicationCommandOptionChoice{
+						{
+							Name:  "Counter-Strike 2",
+							Value: 3,
+						},
+						{
+							Name:  "Deadlock",
+							Value: 2,
+						},
+						{
+							Name:  "Valorant",
+							Value: 3,
+						},
+					},
 				},
 			},
 		},
