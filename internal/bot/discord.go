@@ -3,19 +3,16 @@ package bot
 import (
 	"fmt"
 
-	"github.com/bismastr/discord-bot/internal/database"
 	"github.com/bwmarrin/discordgo"
 )
 
 type Bot struct {
-	Dg       *discordgo.Session
-	database *database.DbClient
+	Dg *discordgo.Session
 }
 
-func NewBot(dg *discordgo.Session, database *database.DbClient) *Bot {
+func NewBot(dg *discordgo.Session) *Bot {
 	return &Bot{
-		Dg:       dg,
-		database: database,
+		Dg: dg,
 	}
 }
 

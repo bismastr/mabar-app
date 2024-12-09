@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/bismastr/discord-bot/internal/bot/components/message_components"
-	"github.com/bismastr/discord-bot/internal/gamingSession"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/user"
 	"github.com/bwmarrin/discordgo"
@@ -16,25 +15,22 @@ import (
 )
 
 type ActionHandlerCtrl struct {
-	gamingSessionService *gamingSession.GamingSessionService
-	userService          *user.UserService
-	gamingSession        *gaming_session.GamingSessionService
-	BotService           *BotService
-	ctx                  context.Context
+	userService   *user.UserService
+	gamingSession *gaming_session.GamingSessionService
+	BotService    *BotService
+	ctx           context.Context
 }
 
 func NewActionHandlerCtrl(
-	gamingSessionService *gamingSession.GamingSessionService,
 	userService *user.UserService,
 	gamingSession *gaming_session.GamingSessionService,
 	botService *BotService,
 	ctx context.Context) *ActionHandlerCtrl {
 	return &ActionHandlerCtrl{
-		gamingSessionService: gamingSessionService,
-		userService:          userService,
-		gamingSession:        gamingSession,
-		BotService:           botService,
-		ctx:                  ctx,
+		userService:   userService,
+		gamingSession: gamingSession,
+		BotService:    botService,
+		ctx:           ctx,
 	}
 }
 
