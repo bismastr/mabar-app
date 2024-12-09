@@ -10,8 +10,10 @@ import (
 	"github.com/bismastr/discord-bot/internal/bot"
 	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/bismastr/discord-bot/internal/db"
+	"github.com/bismastr/discord-bot/internal/firebase"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
+	"github.com/bismastr/discord-bot/internal/notification"
 	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/bismastr/discord-bot/internal/server"
 	"github.com/bismastr/discord-bot/internal/user"
@@ -26,6 +28,11 @@ func main() {
 		panic(err)
 	}
 	defer db.Conn.Close()
+
+	firebase, err := firebase.NewFirebaseClient(context.Background())
+	if err != nil {
+		panic(err)
+	}
 
 	repository := repository.New(db.Conn)
 
@@ -44,6 +51,7 @@ func main() {
 	authService := auth.NewAuthService(sessionStore)
 	botService := bot.NewBotService(discordBot.Dg)
 	userService := user.NewUserService(repository)
+	notificationService := notification.NewNotificationClient(firebase.Messaging)
 
 	//Start Discord
 	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, context.Background())
@@ -52,7 +60,7 @@ func main() {
 	discordBot.AddAllCommand()
 
 	//Start server
-	handler := handler.NewHandler(botService, authService, userService, gaming_session)
+	handler := handler.NewHandler(botService, authService, userService, gaming_session, notificationService)
 	server := server.NewServer(gin.Default(), discordBot.Dg)
 	server.RegisterRoutes(handler)
 	server.Start()

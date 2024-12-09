@@ -14,6 +14,7 @@ func (s *Server) RegisterRoutes(h *handler.Handler) {
 	s.botGamingSessionRoutes(apiV1, h)
 	s.authRoutes(apiV1, h)
 	s.metricsRoutes(apiV1, h)
+	s.notificationRoutes(apiV1, h)
 }
 
 func (s *Server) metricsRoutes(api *gin.RouterGroup, h *handler.Handler) {
@@ -49,5 +50,13 @@ func (s *Server) authRoutes(api *gin.RouterGroup, h *handler.Handler) {
 		authRoutes.GET("/:provider/callback", h.Callback)
 		authRoutes.GET("/:provider", h.Login)
 		authRoutes.GET("/profile", h.Profile)
+	}
+}
+
+func (s *Server) notificationRoutes(api *gin.RouterGroup, h *handler.Handler) {
+	authRoutes := api.Group("/notification")
+
+	{
+		authRoutes.POST("/send", h.SendMessageWithTopic)
 	}
 }
