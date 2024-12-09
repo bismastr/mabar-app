@@ -21,7 +21,7 @@ var (
 					Choices: []*discordgo.ApplicationCommandOptionChoice{
 						{
 							Name:  "Counter-Strike 2",
-							Value: 3,
+							Value: 1,
 						},
 						{
 							Name:  "Deadlock",
