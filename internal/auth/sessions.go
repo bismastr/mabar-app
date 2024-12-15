@@ -1,8 +1,11 @@
 package auth
 
 import (
+	"encoding/gob"
+
 	"github.com/bismastr/discord-bot/internal/config"
 	"github.com/gorilla/sessions"
+	"github.com/markbates/goth"
 )
 
 type SessionOptions struct {
@@ -14,6 +17,8 @@ type SessionOptions struct {
 
 func NewSessionStore(opts SessionOptions) *sessions.CookieStore {
 	var store = sessions.NewCookieStore([]byte(opts.CookiesKey))
+	gob.Register(goth.User{})
+	gob.Register(map[string]interface{}{})
 
 	store.MaxAge(opts.MaxAge)
 	store.Options.Path = "/"
