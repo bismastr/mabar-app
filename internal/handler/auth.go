@@ -44,7 +44,10 @@ func (h *Handler) Callback(ctx *gin.Context) {
 
 	err = h.auth.StoreUserSession(ctx.Writer, ctx.Request, user)
 	if err != nil {
-		ctx.AbortWithError(500, err)
+		ctx.JSON(500, gin.H{
+			"message": "Failed to store user session",
+			"err":     err.Error(),
+		})
 		return
 	}
 

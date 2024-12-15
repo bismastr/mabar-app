@@ -33,7 +33,6 @@ func NewAuthService(store sessions.Store) *AuthService {
 
 func (a *AuthService) StoreUserSession(w http.ResponseWriter, r *http.Request, user goth.User) error {
 	session, _ := gothic.Store.Get(r, SessionName)
-
 	session.Values["user"] = user
 
 	err := session.Save(r, w)
