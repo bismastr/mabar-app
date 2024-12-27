@@ -24,6 +24,7 @@ func (g *GamingSessionService) CreateGamingSession(ctx context.Context, gamingSe
 		SessionStart: gamingSession.SessionStart,
 		CreatedBy:    gamingSession.CreatedBy,
 		GameID:       gamingSession.GameID,
+		Name:         gamingSession.Name,
 	})
 
 	if err != nil {
@@ -92,6 +93,7 @@ func (g *GamingSessionService) GetAllGamingSessions(ctx context.Context, req *Ge
 				IsFinish:     row.IsFinish,
 				SessionEnd:   row.SessionEnd,
 				SessionStart: row.SessionStart,
+				Name:         row.Name,
 				CreatedBy: GamingSessionUser{
 					UserID:     row.CreatedByUserID,
 					DiscordUid: row.CreatedByDiscordUid,

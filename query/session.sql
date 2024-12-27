@@ -1,6 +1,6 @@
 -- name: InsertGamingSession :one
-INSERT INTO sessions (is_finish, session_end, session_start, created_by, game_id) 
-VALUES ($1, $2, $3, $4, $5) 
+INSERT INTO sessions (is_finish, session_end, session_start, created_by, game_id, name) 
+VALUES ($1, $2, $3, $4, $5, $6) 
 RETURNING *;
 
 -- name: InsertUserJoinSession :exec
@@ -46,6 +46,7 @@ SELECT
     s.session_start,
     s.created_by,
     s.game_id,
+    s.name,
     u.id AS user_id,
     u.username,
     u.avatar_url,

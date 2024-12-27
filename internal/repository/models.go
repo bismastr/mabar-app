@@ -21,7 +21,7 @@ type Session struct {
 	SessionStart pgtype.Timestamp
 	CreatedBy    int64
 	GameID       int64
-	CreatedAt    pgtype.Timestamptz
+	Name         pgtype.Text
 }
 
 type User struct {
