@@ -74,7 +74,7 @@ func (g *GamingSessionService) GetGamingSessionById(ctx context.Context, id int6
 }
 
 func (g *GamingSessionService) GetAllGamingSessions(ctx context.Context, req *GetAllGamingSessionRequest) (*[]GetGamingSessionResponse, error) {
-	offset := req.Page * req.Rows
+	offset := (req.Page - 1) * req.Rows
 	rows, err := g.repository.GetAllSessions(ctx, repository.GetAllSessionsParams{
 		Limit:  int32(req.Rows),
 		Offset: int32(offset),
