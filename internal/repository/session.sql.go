@@ -19,6 +19,7 @@ SELECT
     s.session_start,
     s.created_by,
     s.game_id,
+    s.name,
     u.id AS user_id,
     u.username,
     u.avatar_url,
@@ -56,6 +57,7 @@ type GetAllSessionsRow struct {
 	SessionStart        pgtype.Timestamp
 	CreatedBy           int64
 	GameID              int64
+	Name                pgtype.Text
 	UserID              pgtype.Int8
 	Username            pgtype.Text
 	AvatarUrl           pgtype.Text
@@ -84,6 +86,7 @@ func (q *Queries) GetAllSessions(ctx context.Context, arg GetAllSessionsParams) 
 			&i.SessionStart,
 			&i.CreatedBy,
 			&i.GameID,
+			&i.Name,
 			&i.UserID,
 			&i.Username,
 			&i.AvatarUrl,
@@ -194,9 +197,9 @@ func (q *Queries) GetSessionById(ctx context.Context, id int64) ([]GetSessionByI
 }
 
 const insertGamingSession = `-- name: InsertGamingSession :one
-INSERT INTO sessions (is_finish, session_end, session_start, created_by, game_id) 
-VALUES ($1, $2, $3, $4, $5) 
-RETURNING id, is_finish, session_end, session_start, created_by, game_id, created_at
+INSERT INTO sessions (is_finish, session_end, session_start, created_by, game_id, name) 
+VALUES ($1, $2, $3, $4, $5, $6) 
+RETURNING id, is_finish, session_end, session_start, created_by, game_id, name
 `
 
 type InsertGamingSessionParams struct {
@@ -205,6 +208,7 @@ type InsertGamingSessionParams struct {
 	SessionStart pgtype.Timestamp
 	CreatedBy    int64
 	GameID       int64
+	Name         pgtype.Text
 }
 
 func (q *Queries) InsertGamingSession(ctx context.Context, arg InsertGamingSessionParams) (Session, error) {
@@ -214,6 +218,7 @@ func (q *Queries) InsertGamingSession(ctx context.Context, arg InsertGamingSessi
 		arg.SessionStart,
 		arg.CreatedBy,
 		arg.GameID,
+		arg.Name,
 	)
 	var i Session
 	err := row.Scan(
@@ -223,7 +228,7 @@ func (q *Queries) InsertGamingSession(ctx context.Context, arg InsertGamingSessi
 		&i.SessionStart,
 		&i.CreatedBy,
 		&i.GameID,
-		&i.CreatedAt,
+		&i.Name,
 	)
 	return i, err
 }

@@ -1,0 +1,1 @@
+ALTER TABLE sessions ADD COLUMN name VARCHAR(255);
