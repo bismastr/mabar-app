@@ -40,7 +40,7 @@ LEFT JOIN
 LEFT JOIN 
     users u ON us.user_id = u.id
 ORDER BY 
-    s.id
+    s.id DESC
 LIMIT $1 OFFSET $2
 `
 
@@ -196,7 +196,7 @@ func (q *Queries) GetSessionById(ctx context.Context, id int64) ([]GetSessionByI
 const insertGamingSession = `-- name: InsertGamingSession :one
 INSERT INTO sessions (is_finish, session_end, session_start, created_by, game_id) 
 VALUES ($1, $2, $3, $4, $5) 
-RETURNING id, is_finish, session_end, session_start, created_by, game_id
+RETURNING id, is_finish, session_end, session_start, created_by, game_id, created_at
 `
 
 type InsertGamingSessionParams struct {
@@ -223,6 +223,7 @@ func (q *Queries) InsertGamingSession(ctx context.Context, arg InsertGamingSessi
 		&i.SessionStart,
 		&i.CreatedBy,
 		&i.GameID,
+		&i.CreatedAt,
 	)
 	return i, err
 }
