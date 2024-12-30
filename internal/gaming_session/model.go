@@ -15,6 +15,16 @@ type CreateGamingSessionRequest struct {
 	Name         pgtype.Text      `json:"name"`
 }
 
+type CreateGamingSessionResponse struct {
+	IsFinish     pgtype.Bool      `json:"is_finish"`
+	SessionEnd   pgtype.Timestamp `json:"session_end"`
+	SessionStart pgtype.Timestamp `json:"session_start"`
+	CreatedBy    int64            `json:"created_by"`
+	GameID       int64            `json:"game_id"`
+	Name         pgtype.Text      `json:"name"`
+	ID           int64            `json:"id"`
+}
+
 // JoinGamingSession
 type JoinGamingSesionRequest struct {
 	UserId    int64 `json:"user_id"`

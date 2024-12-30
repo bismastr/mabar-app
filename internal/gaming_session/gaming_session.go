@@ -17,7 +17,7 @@ func NewGamingSessionService(repository *repository.Queries) *GamingSessionServi
 	}
 }
 
-func (g *GamingSessionService) CreateGamingSession(ctx context.Context, gamingSession *CreateGamingSessionRequest) (*repository.Session, error) {
+func (g *GamingSessionService) CreateGamingSession(ctx context.Context, gamingSession *CreateGamingSessionRequest) (*CreateGamingSessionResponse, error) {
 	result, err := g.repository.InsertGamingSession(ctx, repository.InsertGamingSessionParams{
 		IsFinish:     gamingSession.IsFinish,
 		SessionEnd:   gamingSession.SessionEnd,
@@ -31,7 +31,15 @@ func (g *GamingSessionService) CreateGamingSession(ctx context.Context, gamingSe
 		return nil, err
 	}
 
-	return &result, nil
+	return &CreateGamingSessionResponse{
+		IsFinish:     result.IsFinish,
+		SessionEnd:   result.SessionEnd,
+		SessionStart: result.SessionStart,
+		CreatedBy:    result.CreatedBy,
+		GameID:       result.GameID,
+		Name:         result.Name,
+		ID:           result.ID,
+	}, nil
 }
 
 func (g *GamingSessionService) GetGamingSessionById(ctx context.Context, id int64) (*GetGamingSessionResponse, error) {
