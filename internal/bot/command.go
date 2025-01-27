@@ -31,6 +31,10 @@ var (
 							Name:  "Valorant",
 							Value: 3,
 						},
+						{
+							Name:  "GTA V",
+							Value: 4,
+						},
 					},
 				},
 			},
