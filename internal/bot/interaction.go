@@ -8,6 +8,7 @@ import (
 
 	"github.com/bismastr/discord-bot/internal/bot/components/message_components"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
+	"github.com/bismastr/discord-bot/internal/llm"
 	"github.com/bismastr/discord-bot/internal/user"
 	"github.com/bwmarrin/discordgo"
 	"github.com/jackc/pgx/v5"
@@ -18,6 +19,7 @@ type ActionHandlerCtrl struct {
 	userService   *user.UserService
 	gamingSession *gaming_session.GamingSessionService
 	BotService    *BotService
+	llmService    *llm.LlmService
 	ctx           context.Context
 }
 
@@ -25,13 +27,45 @@ func NewActionHandlerCtrl(
 	userService *user.UserService,
 	gamingSession *gaming_session.GamingSessionService,
 	botService *BotService,
+	llmService *llm.LlmService,
 	ctx context.Context) *ActionHandlerCtrl {
 	return &ActionHandlerCtrl{
 		userService:   userService,
 		gamingSession: gamingSession,
 		BotService:    botService,
 		ctx:           ctx,
+		llmService:    llmService,
 	}
+}
+
+func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	options := i.ApplicationCommandData().Options
+	var question string
+	for _, option := range options {
+		if option.Name == "question" {
+			question = option.StringValue()
+			break
+		}
+	}
+
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	resp, err := a.llmService.GetGenerateResponse(a.ctx, question)
+	if err != nil {
+		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+			Content: "Error generating response. Please try again later.",
+		})
+		return
+	}
+
+	s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+		Content: fmt.Sprintf("AI Response: %v", resp),
+	})
 }
 
 func (a *ActionHandlerCtrl) JoinGamingSessionV2(s *discordgo.Session, i *discordgo.InteractionCreate) {

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/bot"
@@ -13,6 +14,7 @@ import (
 	"github.com/bismastr/discord-bot/internal/firebase"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
+	"github.com/bismastr/discord-bot/internal/llm"
 	"github.com/bismastr/discord-bot/internal/notification"
 	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/bismastr/discord-bot/internal/server"
@@ -53,8 +55,12 @@ func main() {
 	userService := user.NewUserService(repository)
 	notificationService := notification.NewNotificationClient(firebase.Messaging)
 
+	gemini := llm.NewGeminiClient(context.Background())
+	llmService := llm.NewLlmService(gemini)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
 	//Start Discord
-	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, context.Background())
+	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, llmService, ctx)
 	discordBot.RegisterHandler(botHandler)
 	discordBot.Open()
 	discordBot.AddAllCommand()
