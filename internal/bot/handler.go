@@ -14,6 +14,7 @@ func (b *Bot) interactionHandler(h *ActionHandlerCtrl, s *discordgo.Session, i *
 	var (
 		commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 			"create-mabar": h.CreateMabar,
+			"ask-ai":       h.GenerateContent,
 		}
 		componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 			"mabar_no":    h.DeclineGamingSession,

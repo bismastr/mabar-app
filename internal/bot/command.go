@@ -39,6 +39,10 @@ var (
 				},
 			},
 		},
+		{
+			Name:        "ask-ai",
+			Description: "Ask anything to mas2 AI",
+		},
 	}
 )
 

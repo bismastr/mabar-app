@@ -13,6 +13,7 @@ import (
 	"github.com/bismastr/discord-bot/internal/firebase"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
+	"github.com/bismastr/discord-bot/internal/llm"
 	"github.com/bismastr/discord-bot/internal/notification"
 	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/bismastr/discord-bot/internal/server"
@@ -53,8 +54,11 @@ func main() {
 	userService := user.NewUserService(repository)
 	notificationService := notification.NewNotificationClient(firebase.Messaging)
 
+	gemini := llm.NewGeminiClient(context.Background())
+	llmService := llm.NewLlmService(gemini)
+
 	//Start Discord
-	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, context.Background())
+	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, llmService, context.Background())
 	discordBot.RegisterHandler(botHandler)
 	discordBot.Open()
 	discordBot.AddAllCommand()

@@ -8,6 +8,7 @@ import (
 
 	"github.com/bismastr/discord-bot/internal/bot/components/message_components"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
+	"github.com/bismastr/discord-bot/internal/llm"
 	"github.com/bismastr/discord-bot/internal/user"
 	"github.com/bwmarrin/discordgo"
 	"github.com/jackc/pgx/v5"
@@ -18,6 +19,7 @@ type ActionHandlerCtrl struct {
 	userService   *user.UserService
 	gamingSession *gaming_session.GamingSessionService
 	BotService    *BotService
+	llmService    *llm.LlmService
 	ctx           context.Context
 }
 
@@ -25,15 +27,25 @@ func NewActionHandlerCtrl(
 	userService *user.UserService,
 	gamingSession *gaming_session.GamingSessionService,
 	botService *BotService,
+	llmService *llm.LlmService,
 	ctx context.Context) *ActionHandlerCtrl {
 	return &ActionHandlerCtrl{
 		userService:   userService,
 		gamingSession: gamingSession,
 		BotService:    botService,
 		ctx:           ctx,
+		llmService:    llmService,
 	}
 }
 
+func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	resp, err := a.llmService.GetGenerateResponse(a.ctx, "7 tambah 8 berapa?")
+	if err != nil {
+		message_components.ErrorMessage(s, i)
+	}
+
+	message_components.SendMessage(s, i, fmt.Sprintf("AI Response: %v", resp))
+}
 func (a *ActionHandlerCtrl) JoinGamingSessionV2(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	userId, _ := strconv.ParseInt(i.Member.User.ID, 10, 64)
 	customId := i.MessageComponentData().CustomID
