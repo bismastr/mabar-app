@@ -42,6 +42,14 @@ var (
 		{
 			Name:        "ask-ai",
 			Description: "Ask anything to mas2 AI",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString, // Text input
+					Name:        "question",
+					Description: "Tanya apa aja ke Mas AI",
+					Required:    true,
+				},
+			},
 		},
 	}
 )

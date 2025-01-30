@@ -39,13 +39,35 @@ func NewActionHandlerCtrl(
 }
 
 func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	resp, err := a.llmService.GetGenerateResponse(a.ctx, "7 tambah 8 berapa?")
-	if err != nil {
-		message_components.ErrorMessage(s, i)
+	options := i.ApplicationCommandData().Options
+	var question string
+	for _, option := range options {
+		if option.Name == "question" {
+			question = option.StringValue()
+			break
+		}
 	}
 
-	message_components.SendMessage(s, i, fmt.Sprintf("AI Response: %v", resp))
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	resp, err := a.llmService.GetGenerateResponse(a.ctx, question)
+	if err != nil {
+		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+			Content: "Error generating response. Please try again later.",
+		})
+		return
+	}
+
+	s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+		Content: fmt.Sprintf("AI Response: %v", resp),
+	})
 }
+
 func (a *ActionHandlerCtrl) JoinGamingSessionV2(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	userId, _ := strconv.ParseInt(i.Member.User.ID, 10, 64)
 	customId := i.MessageComponentData().CustomID

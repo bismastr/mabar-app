@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/bot"
@@ -56,9 +57,10 @@ func main() {
 
 	gemini := llm.NewGeminiClient(context.Background())
 	llmService := llm.NewLlmService(gemini)
-
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
 	//Start Discord
-	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, llmService, context.Background())
+	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, llmService, ctx)
 	discordBot.RegisterHandler(botHandler)
 	discordBot.Open()
 	discordBot.AddAllCommand()

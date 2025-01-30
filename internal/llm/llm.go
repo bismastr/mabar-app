@@ -16,23 +16,27 @@ func NewLlmService(gemini *GeminiClient) *LlmService {
 	}
 }
 
-func (l *LlmService) GetGenerateResponse(ctx context.Context, req string) (*genai.Part, error) {
-	resp, err := l.client.Model.GenerateContent(ctx, genai.Text("7 tambah 8 berapa?"))
+func (l *LlmService) GetGenerateResponse(ctx context.Context, req string) (string, error) {
+	resp, err := l.client.Model.GenerateContent(ctx, genai.Text(req))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	return getText(resp), nil
 }
 
-func getText(resp *genai.GenerateContentResponse) *genai.Part {
+func getText(resp *genai.GenerateContentResponse) string {
+	var result string
 	for _, cand := range resp.Candidates {
 		if cand.Content != nil {
 			for _, part := range cand.Content.Parts {
-				return &part
+				switch p := part.(type) {
+				case genai.Text:
+					result += string(p)
+				default:
+				}
 			}
 		}
 	}
-
-	return nil
+	return result
 }
