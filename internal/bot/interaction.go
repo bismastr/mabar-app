@@ -48,17 +48,14 @@ func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.I
 		}
 	}
 
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
-	if err != nil {
-		panic(err)
-	}
 
 	resp, err := a.llmService.GetGenerateResponse(a.ctx, question)
 	if err != nil {
 		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-			Content: "Error generating response. Please try again later.",
+			Content: err.Error(),
 		})
 		return
 	}

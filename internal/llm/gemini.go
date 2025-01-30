@@ -21,16 +21,18 @@ type ProxyRoundTripper struct {
 }
 
 func NewGeminiClient(ctx context.Context) *GeminiClient {
-	c := &http.Client{Transport: &ProxyRoundTripper{
-		APIKey: os.Getenv("GEMINI_API_KEY"),
-	}}
 
-	client, err := genai.NewClient(ctx, option.WithHTTPClient(c))
+	apiKey := os.Getenv("GEMINI_API_KEY")
+	if apiKey == "" {
+		log.Fatal("GEMINI_API_KEY environment variable not set")
+	}
+
+	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	model := client.GenerativeModel("gemini-1.5-pro")
+	model := client.GenerativeModel("gemini-1.5-flash")
 
 	return &GeminiClient{
 		Model: model,
