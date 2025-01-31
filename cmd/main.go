@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/bot"
@@ -30,8 +29,7 @@ func main() {
 	}
 	defer db.Conn.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	ctx := context.Background()
 
 	firebase, err := firebase.NewFirebaseClient(ctx)
 	if err != nil {
