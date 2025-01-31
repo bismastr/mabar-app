@@ -16,13 +16,15 @@ func NewLlmService(gemini *GeminiClient) *LlmService {
 	}
 }
 
-func (l *LlmService) GetGenerateResponse(ctx context.Context, req string) (string, error) {
+func (l *LlmService) GetGenerateResponse(ctx context.Context, req string) ([]string, error) {
 	resp, err := l.client.Model.GenerateContent(ctx, genai.Text(req))
 	if err != nil {
-		return "", err
+		return []string{}, err
 	}
 
-	return getText(resp), nil
+	response := getText(resp)
+
+	return splitMessage(response, 1800), nil
 }
 
 func getText(resp *genai.GenerateContentResponse) string {
@@ -39,4 +41,14 @@ func getText(resp *genai.GenerateContentResponse) string {
 		}
 	}
 	return result
+}
+
+func splitMessage(message string, maxLength int) []string {
+	var splitted []string
+	for len(message) > maxLength {
+		splitted = append(splitted, message[:maxLength])
+		message = message[maxLength:]
+	}
+	splitted = append(splitted, message)
+	return splitted
 }

@@ -3,6 +3,7 @@ package bot
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -55,15 +56,22 @@ func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.I
 	go func() {
 		resp, err := a.llmService.GetGenerateResponse(a.ctx, question)
 		if err != nil {
+			log.Printf("Error getting response: %v", err)
 			s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-				Content: err.Error(),
+				Content: "Unable to generate LLM response",
 			})
 			return
 		}
 
-		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-			Content: fmt.Sprintf("AI Response: %v", resp),
-		})
+		for _, part := range resp {
+			_, err = s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+				Content: part,
+			})
+			if err != nil {
+				log.Printf("Error getting response: %v", err)
+				break
+			}
+		}
 	}()
 }
 
