@@ -24,14 +24,16 @@ import (
 )
 
 func main() {
-
 	db, err := db.NewDatabase()
 	if err != nil {
 		panic(err)
 	}
 	defer db.Conn.Close()
 
-	firebase, err := firebase.NewFirebaseClient(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	firebase, err := firebase.NewFirebaseClient(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -55,10 +57,9 @@ func main() {
 	userService := user.NewUserService(repository)
 	notificationService := notification.NewNotificationClient(firebase.Messaging)
 
-	gemini := llm.NewGeminiClient(context.Background())
+	gemini := llm.NewGeminiClient(ctx)
 	llmService := llm.NewLlmService(gemini)
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
-	defer cancel()
+
 	//Start Discord
 	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, llmService, ctx)
 	discordBot.RegisterHandler(botHandler)

@@ -52,17 +52,19 @@ func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.I
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
 
-	resp, err := a.llmService.GetGenerateResponse(a.ctx, question)
-	if err != nil {
-		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-			Content: err.Error(),
-		})
-		return
-	}
+	go func() {
+		resp, err := a.llmService.GetGenerateResponse(a.ctx, question)
+		if err != nil {
+			s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+				Content: err.Error(),
+			})
+			return
+		}
 
-	s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-		Content: fmt.Sprintf("AI Response: %v", resp),
-	})
+		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+			Content: fmt.Sprintf("AI Response: %v", resp),
+		})
+	}()
 }
 
 func (a *ActionHandlerCtrl) JoinGamingSessionV2(s *discordgo.Session, i *discordgo.InteractionCreate) {
