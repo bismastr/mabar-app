@@ -41,6 +41,7 @@ func NewActionHandlerCtrl(
 
 func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	options := i.ApplicationCommandData().Options
+	username := i.Member.User.Username
 	var question string
 	for _, option := range options {
 		if option.Name == "question" {
@@ -49,9 +50,14 @@ func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.I
 		}
 	}
 
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	content := fmt.Sprintf("@%s Asking: %s", username, question)
+
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
+	if err != nil {
+		log.Printf("Error getting response: %v", err)
+	}
 
 	go func() {
 		resp, err := a.llmService.GetGenerateResponse(a.ctx, question)
@@ -62,6 +68,9 @@ func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.I
 			})
 			return
 		}
+		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+			Content: content,
+		})
 
 		for _, part := range resp {
 			_, err = s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
