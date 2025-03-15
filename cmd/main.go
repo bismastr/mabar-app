@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/bismastr/discord-bot/internal/alert_cs_prices"
 	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/bot"
 	"github.com/bismastr/discord-bot/internal/config"
@@ -14,6 +16,7 @@ import (
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
 	"github.com/bismastr/discord-bot/internal/llm"
+	"github.com/bismastr/discord-bot/internal/messaging"
 	"github.com/bismastr/discord-bot/internal/notification"
 	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/bismastr/discord-bot/internal/server"
@@ -55,6 +58,15 @@ func main() {
 	userService := user.NewUserService(repository)
 	notificationService := notification.NewNotificationClient(firebase.Messaging)
 
+	consumer, err := messaging.NewConsumer(config.Envs.RmqUrl)
+	if err != nil {
+		log.Fatal("Unable create consumer")
+	}
+	alertPriceService, err := alert_cs_prices.NewAlertPriceServcie(consumer, botService)
+	if err != nil {
+		log.Fatal("Unable create price service")
+	}
+
 	gemini := llm.NewGeminiClient(ctx)
 	llmService := llm.NewLlmService(gemini)
 
@@ -67,6 +79,7 @@ func main() {
 	//Start server
 	handler := handler.NewHandler(botService, authService, userService, gaming_session, notificationService)
 	server := server.NewServer(gin.Default(), discordBot.Dg)
+	alertPriceService.DailyReportSummary()
 	server.RegisterRoutes(handler)
 	server.Start()
 

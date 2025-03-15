@@ -17,6 +17,15 @@ func NewBotService(dg *discordgo.Session) *BotService {
 	}
 }
 
+func (b *BotService) SendMessageToChannel(channelId, content string) error {
+	_, err := b.dg.ChannelMessageSend(channelId, content)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (b *BotService) CreateGamingSession(gamingSession *gaming_session.GetGamingSessionResponse, channelId string) (*discordgo.Message, error) {
 	content := fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\n%s \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> MABAR ᴄʀᴇᴀᴛᴇᴅ ʙʏ <@%d>\n> Try mabar website: [Mabar Website](https://mabar.bism.app/)", gamingSession.Game.GameName.String, gamingSession.CreatedBy.DiscordUid.Int64)
 	if gamingSession.Game.GameName.String == "" {
