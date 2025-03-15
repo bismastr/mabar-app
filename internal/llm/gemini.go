@@ -19,7 +19,6 @@ type ProxyRoundTripper struct {
 }
 
 func NewGeminiClient(ctx context.Context) *GeminiClient {
-
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	if apiKey == "" {
 		log.Fatal("GEMINI_API_KEY environment variable not set")

@@ -22,6 +22,7 @@ type Config struct {
 	SessionName             string
 	CallbackRedirectUrl     string
 	CookiesDomain           string
+	RmqUrl                  string
 }
 
 var Envs = initConfig()
@@ -43,6 +44,7 @@ func initConfig() Config {
 		SessionName:             getEnv("SESSION_NAME", "session_user"),
 		CallbackRedirectUrl:     getEnv("CALLBACK_URL", "http://localhost:5173"),
 		CookiesDomain:           getEnv("COOKIES_DOMAIN_NAME", "http://mabar.bism.app"),
+		RmqUrl:                  getEnv("RMQ_URL", "empty url check your config"),
 	}
 }
 
