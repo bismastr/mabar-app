@@ -1,18 +1,16 @@
 package alert_cs_prices
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"math"
+	"context"
 
-	"github.com/bismastr/discord-bot/internal/bot"
 	"github.com/bismastr/discord-bot/internal/messaging"
+	"github.com/bismastr/discord-bot/internal/repository"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type AlertPriceSertvice struct {
-	consumer *messaging.Consumer
-	bot      *bot.BotService
+	consumer           *messaging.Consumer
+	repositoryCsPrices *repository.Queries
 }
 
 type NotificationPriceSummary struct {
@@ -26,48 +24,60 @@ type NotificationPriceSummary struct {
 	DiscordId    int64   `json:"discord_id"`
 }
 
-func NewAlertPriceServcie(consumer *messaging.Consumer, bot *bot.BotService) (*AlertPriceSertvice, error) {
+func NewAlertPriceServcie(consumer *messaging.Consumer, repositoryCsPrices *repository.Queries) (*AlertPriceSertvice, error) {
 	return &AlertPriceSertvice{
-		consumer: consumer,
-		bot:      bot,
+		consumer:           consumer,
+		repositoryCsPrices: repositoryCsPrices,
 	}, nil
 }
 
-func (a *AlertPriceSertvice) DailyReportSummary() error {
-	msgs, close, err := a.consumer.Consume("notification_price_alerts")
+func (a *AlertPriceSertvice) GetItemsContainsName(ctx context.Context, query string) (*[]repository.GetItemsContainsNameRow, error) {
+	res, err := a.repositoryCsPrices.GetItemsContainsName(ctx, pgtype.Text{
+		String: query,
+		Valid:  true,
+	})
 	if err != nil {
-		log.Printf("Error decoding message: %v", err)
-		return err
-	}
-	defer close()
-
-	for d := range msgs {
-		var dailySummary NotificationPriceSummary
-		err := json.Unmarshal(d.Body, &dailySummary)
-		if err != nil {
-			return err
-		}
-
-		report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 FOR \n", dailySummary.DiscordId, dailySummary.ItemId)
-		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-		report += fmt.Sprintf("🟢 **Open**:   $%.2f\n", dailySummary.OpeningPrice)
-		report += fmt.Sprintf("🔴 **Close**:  $%.2f\n", dailySummary.ClosingPrice)
-		report += fmt.Sprintf("🔺 **High**:    $%.2f\n", dailySummary.MaxPrice)
-		report += fmt.Sprintf("🔻 **Low**:     $%.2f\n", dailySummary.MinPrice)
-		report += fmt.Sprintf("📌 **Avg**:     $%.2f\n", dailySummary.AvgPrice)
-		report += fmt.Sprintf("📈 **Change**: %s%.2f%%\n", getChangeEmoji(dailySummary.ChangePct), math.Abs(dailySummary.ChangePct))
-		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-
-		a.bot.SendMessageToChannel("1276782792876888075", report)
+		return nil, err
 	}
 
-	return nil
+	return &res, nil
 }
 
-// Helper function for change emoji
-func getChangeEmoji(change float64) string {
-	if change >= 0 {
-		return "⬆️ "
-	}
-	return "⬇️ "
-}
+// func (a *AlertPriceSertvice) DailyReportSummary() error {
+// 	msgs, close, err := a.consumer.Consume("notification_price_alerts")
+// 	if err != nil {
+// 		log.Printf("Error decoding message: %v", err)
+// 		return err
+// 	}
+// 	defer close()
+
+// 	for d := range msgs {
+// 		var dailySummary NotificationPriceSummary
+// 		err := json.Unmarshal(d.Body, &dailySummary)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 FOR %d \n", dailySummary.DiscordId, dailySummary.ItemId)
+// 		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+// 		report += fmt.Sprintf("🟢 **Open**:   $%.2f\n", dailySummary.OpeningPrice)
+// 		report += fmt.Sprintf("🔴 **Close**:  $%.2f\n", dailySummary.ClosingPrice)
+// 		report += fmt.Sprintf("🔺 **High**:    $%.2f\n", dailySummary.MaxPrice)
+// 		report += fmt.Sprintf("🔻 **Low**:     $%.2f\n", dailySummary.MinPrice)
+// 		report += fmt.Sprintf("📌 **Avg**:     $%.2f\n", dailySummary.AvgPrice)
+// 		report += fmt.Sprintf("📈 **Change**: %s%.2f%%\n", getChangeEmoji(dailySummary.ChangePct), math.Abs(dailySummary.ChangePct))
+// 		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+
+// 		a.bot.SendMessageToChannel("1276782792876888075", report)
+// 	}
+
+// 	return nil
+// }
+
+// // Helper function for change emoji
+// func getChangeEmoji(change float64) string {
+// 	if change >= 0 {
+// 		return "⬆️ "
+// 	}
+// 	return "⬇️ "
+// }

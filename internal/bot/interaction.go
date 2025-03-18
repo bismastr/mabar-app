@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/bismastr/discord-bot/internal/alert_cs_prices"
 	"github.com/bismastr/discord-bot/internal/bot/components/message_components"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/llm"
@@ -17,11 +18,12 @@ import (
 )
 
 type ActionHandlerCtrl struct {
-	userService   *user.UserService
-	gamingSession *gaming_session.GamingSessionService
-	BotService    *BotService
-	llmService    *llm.LlmService
-	ctx           context.Context
+	userService    *user.UserService
+	gamingSession  *gaming_session.GamingSessionService
+	BotService     *BotService
+	llmService     *llm.LlmService
+	alertCsService *alert_cs_prices.AlertPriceSertvice
+	ctx            context.Context
 }
 
 func NewActionHandlerCtrl(
@@ -29,14 +31,68 @@ func NewActionHandlerCtrl(
 	gamingSession *gaming_session.GamingSessionService,
 	botService *BotService,
 	llmService *llm.LlmService,
+	alertCsService *alert_cs_prices.AlertPriceSertvice,
 	ctx context.Context) *ActionHandlerCtrl {
 	return &ActionHandlerCtrl{
-		userService:   userService,
-		gamingSession: gamingSession,
-		BotService:    botService,
-		ctx:           ctx,
-		llmService:    llmService,
+		userService:    userService,
+		gamingSession:  gamingSession,
+		BotService:     botService,
+		ctx:            ctx,
+		llmService:     llmService,
+		alertCsService: alertCsService,
 	}
+}
+
+func (a *ActionHandlerCtrl) CreateSchedulerCsItems(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	content := fmt.Sprintf("Testing Autocomplete for add scheduler %s", i.ApplicationCommandData().Options[0].StringValue())
+	message_components.SendMessage(s, i, content)
+}
+
+func (a *ActionHandlerCtrl) CsItemsAutocomplete(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	data := i.ApplicationCommandData()
+	var focusedOption *discordgo.ApplicationCommandInteractionDataOption
+	for _, option := range data.Options {
+		if option.Focused {
+			focusedOption = option
+			break
+		}
+	}
+
+	searchQuery := ""
+	if focusedOption != nil {
+		searchQuery = focusedOption.StringValue()
+	}
+
+	itemsPtr, err := a.alertCsService.GetItemsContainsName(a.ctx, searchQuery)
+	if err != nil {
+		log.Printf("error getting: %d", err)
+	}
+
+	if itemsPtr == nil {
+		return
+	}
+
+	items := *itemsPtr
+
+	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0, len(items))
+	for _, item := range items {
+		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+			Name:  item.Name,
+			Value: fmt.Sprintf("%d", item.ID),
+		})
+	}
+
+	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
+		Data: &discordgo.InteractionResponseData{
+			Choices: choices,
+		},
+	})
+
+	if err != nil {
+		log.Printf("Error responding to autocomplete: %v", err)
+	}
+
 }
 
 func (a *ActionHandlerCtrl) GenerateContent(s *discordgo.Session, i *discordgo.InteractionCreate) {

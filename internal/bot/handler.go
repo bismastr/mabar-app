@@ -13,8 +13,9 @@ func (b *Bot) RegisterHandler(h *ActionHandlerCtrl) {
 func (b *Bot) interactionHandler(h *ActionHandlerCtrl, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var (
 		commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-			"create-mabar": h.CreateMabar,
-			"ask-ai":       h.GenerateContent,
+			"create-mabar":          h.CreateMabar,
+			"ask-ai":                h.GenerateContent,
+			"create-daily-cs-alert": h.CreateSchedulerCsItems,
 		}
 		componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 			"mabar_no":    h.DeclineGamingSession,
@@ -33,6 +34,8 @@ func (b *Bot) interactionHandler(h *ActionHandlerCtrl, s *discordgo.Session, i *
 		if h, ok := componentsHandlers[prefix]; ok {
 			h(s, i)
 		}
+	case discordgo.InteractionApplicationCommandAutocomplete:
+		h.CsItemsAutocomplete(s, i)
 	}
 
 }

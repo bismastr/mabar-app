@@ -11,7 +11,8 @@ import (
 	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/bot"
 	"github.com/bismastr/discord-bot/internal/config"
-	"github.com/bismastr/discord-bot/internal/db"
+	"github.com/bismastr/discord-bot/internal/db/cs_prices_db"
+	"github.com/bismastr/discord-bot/internal/db/mabar_db"
 	"github.com/bismastr/discord-bot/internal/firebase"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
@@ -26,11 +27,16 @@ import (
 )
 
 func main() {
-	db, err := db.NewDatabase()
+	db, err := mabar_db.NewDatabase()
 	if err != nil {
 		panic(err)
 	}
 	defer db.Conn.Close()
+
+	csPricesDb, err := cs_prices_db.NewDatabase()
+	if err != nil {
+		panic(err)
+	}
 
 	ctx := context.Background()
 
@@ -38,7 +44,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	csRepository := repository.New(csPricesDb.Conn)
 	repository := repository.New(db.Conn)
 
 	dg, _ := discordgo.New(config.Envs.DiscordBotToken)
@@ -62,7 +68,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Unable create consumer")
 	}
-	alertPriceService, err := alert_cs_prices.NewAlertPriceServcie(consumer, botService)
+	alertPriceService, err := alert_cs_prices.NewAlertPriceServcie(consumer, csRepository)
 	if err != nil {
 		log.Fatal("Unable create price service")
 	}
@@ -71,7 +77,7 @@ func main() {
 	llmService := llm.NewLlmService(gemini)
 
 	//Start Discord
-	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, llmService, ctx)
+	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, llmService, alertPriceService, ctx)
 	discordBot.RegisterHandler(botHandler)
 	discordBot.Open()
 	discordBot.AddAllCommand()
@@ -79,7 +85,6 @@ func main() {
 	//Start server
 	handler := handler.NewHandler(botService, authService, userService, gaming_session, notificationService)
 	server := server.NewServer(gin.Default(), discordBot.Dg)
-	alertPriceService.DailyReportSummary()
 	server.RegisterRoutes(handler)
 	server.Start()
 

@@ -10,6 +10,19 @@ import (
 var (
 	commands = []*discordgo.ApplicationCommand{
 		{
+			Name:        "create-daily-cs-alert",
+			Description: "I will notify you everyday regarding your choosen case",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:         "autocomplete-option-1",
+					Description:  "Autocomplete option 1",
+					Type:         discordgo.ApplicationCommandOptionString,
+					Required:     true,
+					Autocomplete: true,
+				},
+			},
+		},
+		{
 			Name:        "create-mabar",
 			Description: "Buat sesi mabar baru",
 			Options: []*discordgo.ApplicationCommandOption{
@@ -34,6 +47,10 @@ var (
 						{
 							Name:  "GTA V",
 							Value: 4,
+						},
+						{
+							Name:  "FragPunk Game Terbaik",
+							Value: 5,
 						},
 					},
 				},
