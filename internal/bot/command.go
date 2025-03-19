@@ -10,12 +10,12 @@ import (
 var (
 	commands = []*discordgo.ApplicationCommand{
 		{
-			Name:        "create-daily-cs-alert",
+			Name:        "create-daily-alert",
 			Description: "I will notify you everyday regarding your choosen case",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
-					Name:         "autocomplete-option-1",
-					Description:  "Autocomplete option 1",
+					Name:         "Case Name",
+					Description:  "Choose case name",
 					Type:         discordgo.ApplicationCommandOptionString,
 					Required:     true,
 					Autocomplete: true,

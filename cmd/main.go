@@ -78,6 +78,7 @@ func main() {
 
 	//Start Discord
 	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, llmService, alertPriceService, ctx)
+	botHandler.DailyScheduleSummary()
 	discordBot.RegisterHandler(botHandler)
 	discordBot.Open()
 	discordBot.AddAllCommand()

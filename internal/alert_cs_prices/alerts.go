@@ -6,6 +6,7 @@ import (
 	"github.com/bismastr/discord-bot/internal/messaging"
 	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 type AlertPriceSertvice struct {
@@ -43,41 +44,18 @@ func (a *AlertPriceSertvice) GetItemsContainsName(ctx context.Context, query str
 	return &res, nil
 }
 
-// func (a *AlertPriceSertvice) DailyReportSummary() error {
-// 	msgs, close, err := a.consumer.Consume("notification_price_alerts")
-// 	if err != nil {
-// 		log.Printf("Error decoding message: %v", err)
-// 		return err
-// 	}
-// 	defer close()
+func (a *AlertPriceSertvice) AddDailySchedule(ctx context.Context, param repository.InsertAlertDailyScheduleParams) error {
+	err := a.repositoryCsPrices.InsertAlertDailySchedule(ctx, param)
+	if err != nil {
+		return err
+	}
 
-// 	for d := range msgs {
-// 		var dailySummary NotificationPriceSummary
-// 		err := json.Unmarshal(d.Body, &dailySummary)
-// 		if err != nil {
-// 			return err
-// 		}
+	return nil
+}
 
-// 		report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 FOR %d \n", dailySummary.DiscordId, dailySummary.ItemId)
-// 		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-// 		report += fmt.Sprintf("🟢 **Open**:   $%.2f\n", dailySummary.OpeningPrice)
-// 		report += fmt.Sprintf("🔴 **Close**:  $%.2f\n", dailySummary.ClosingPrice)
-// 		report += fmt.Sprintf("🔺 **High**:    $%.2f\n", dailySummary.MaxPrice)
-// 		report += fmt.Sprintf("🔻 **Low**:     $%.2f\n", dailySummary.MinPrice)
-// 		report += fmt.Sprintf("📌 **Avg**:     $%.2f\n", dailySummary.AvgPrice)
-// 		report += fmt.Sprintf("📈 **Change**: %s%.2f%%\n", getChangeEmoji(dailySummary.ChangePct), math.Abs(dailySummary.ChangePct))
-// 		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+func (a *AlertPriceSertvice) DailyReportSummary() (<-chan amqp091.Delivery, error) {
+	msgs, close, err := a.consumer.Consume("notification_price_alerts")
+	defer close()
 
-// 		a.bot.SendMessageToChannel("1276782792876888075", report)
-// 	}
-
-// 	return nil
-// }
-
-// // Helper function for change emoji
-// func getChangeEmoji(change float64) string {
-// 	if change >= 0 {
-// 		return "⬆️ "
-// 	}
-// 	return "⬇️ "
-// }
+	return msgs, err
+}

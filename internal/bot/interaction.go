@@ -2,6 +2,7 @@ package bot
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"github.com/bismastr/discord-bot/internal/bot/components/message_components"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/llm"
+	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/bismastr/discord-bot/internal/user"
 	"github.com/bwmarrin/discordgo"
 	"github.com/jackc/pgx/v5"
@@ -43,8 +45,60 @@ func NewActionHandlerCtrl(
 	}
 }
 
+func (a *ActionHandlerCtrl) DailyScheduleSummary() {
+	msgs, err := a.alertCsService.DailyReportSummary()
+	if err != nil {
+		log.Printf("Error daily report")
+	}
+
+	for d := range msgs {
+		var dailySummary alert_cs_prices.NotificationPriceSummary
+		err := json.Unmarshal(d.Body, &dailySummary)
+		if err != nil {
+			log.Printf("Error daily report")
+		}
+
+		report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 FOR %d \n", dailySummary.DiscordId, dailySummary.ItemId)
+		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+		report += fmt.Sprintf("🟢 **Open**:   $%.2f\n", dailySummary.OpeningPrice/100)
+		report += fmt.Sprintf("🔴 **Close**:  $%.2f\n", dailySummary.ClosingPrice/100)
+		report += fmt.Sprintf("🔺 **High**:    $%.2f\n", dailySummary.MaxPrice/100)
+		report += fmt.Sprintf("🔻 **Low**:     $%.2f\n", dailySummary.MinPrice/100)
+		report += fmt.Sprintf("📌 **Avg**:     $%.2f\n", dailySummary.AvgPrice/100)
+		report += fmt.Sprintf("📈 **Change**: %.2f%%\n", dailySummary.ChangePct)
+		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+
+		a.BotService.SendMessageToChannel("1276782792876888075", report)
+	}
+
+}
+
 func (a *ActionHandlerCtrl) CreateSchedulerCsItems(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	content := fmt.Sprintf("Testing Autocomplete for add scheduler %s", i.ApplicationCommandData().Options[0].StringValue())
+	userId, _ := strconv.ParseInt(i.Member.User.ID, 10, 64)
+
+	// Convert the string value to an integer
+	itemIDStr := i.ApplicationCommandData().Options[0].StringValue()
+	itemID, err := strconv.Atoi(itemIDStr)
+	if err != nil {
+		log.Println("Invalid item ID")
+		return
+	}
+
+	content := "## Succesfully add daily schedule summary"
+	err = a.alertCsService.AddDailySchedule(a.ctx, repository.InsertAlertDailyScheduleParams{
+		ItemID: pgtype.Int4{
+			Int32: int32(itemID),
+			Valid: true,
+		},
+		DiscordID: pgtype.Int8{
+			Int64: userId,
+			Valid: true,
+		},
+	})
+	if err != nil {
+		log.Println("Cannot insert alert")
+	}
+
 	message_components.SendMessage(s, i, content)
 }
 
