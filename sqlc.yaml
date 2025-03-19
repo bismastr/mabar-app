@@ -1,8 +1,18 @@
 version: "2"
 sql:
-  - engine: "postgresql"
-    queries: "./query"
-    schema: "./internal/db/migrations"
+  - name: "mabar_db"
+    engine: "postgresql"
+    queries: "./query/mabar_db"
+    schema: "./internal/db/mabar_db/migrations"
+    gen:
+      go:
+        package: "repository"
+        out: "internal/repository"
+        sql_package: "pgx/v5"
+  - name: "cs_prices_db" 
+    engine: "postgresql"
+    queries: "./query/cs_prices_db"
+    schema: "./internal/db/cs_prices_db/schema"
     gen:
       go:
         package: "repository"
