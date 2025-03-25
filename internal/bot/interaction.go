@@ -51,6 +51,8 @@ func (a *ActionHandlerCtrl) DailyScheduleSummary() {
 		log.Printf("Error daily report")
 	}
 
+	log.Printf("Testing summary")
+
 	for d := range msgs {
 		var dailySummary alert_cs_prices.NotificationPriceSummary
 		err := json.Unmarshal(d.Body, &dailySummary)

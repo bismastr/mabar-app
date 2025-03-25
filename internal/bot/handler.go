@@ -37,5 +37,4 @@ func (b *Bot) interactionHandler(h *ActionHandlerCtrl, s *discordgo.Session, i *
 	case discordgo.InteractionApplicationCommandAutocomplete:
 		h.CsItemsAutocomplete(s, i)
 	}
-
 }
