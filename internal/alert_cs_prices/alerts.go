@@ -53,9 +53,8 @@ func (a *AlertPriceSertvice) AddDailySchedule(ctx context.Context, param reposit
 	return nil
 }
 
-func (a *AlertPriceSertvice) DailyReportSummary() (<-chan amqp091.Delivery, error) {
+func (a *AlertPriceSertvice) DailyReportSummary() (<-chan amqp091.Delivery, func(), error) {
 	msgs, close, err := a.consumer.Consume("notification_price_alerts")
-	defer close()
 
-	return msgs, err
+	return msgs, close, err
 }
