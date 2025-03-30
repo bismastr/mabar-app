@@ -45,34 +45,36 @@ func NewActionHandlerCtrl(
 	}
 }
 
-func (a *ActionHandlerCtrl) DailyScheduleSummary() {
-	msgs, err := a.alertCsService.DailyReportSummary()
+func (a *ActionHandlerCtrl) DailyScheduleSummary() (func(), error) {
+	log.Println("Daily report summary ")
+	msgs, close, err := a.alertCsService.DailyReportSummary()
 	if err != nil {
-		log.Printf("Error daily report")
+		log.Println("Error daily report")
+		return nil, err
 	}
+	go func() {
+		for d := range msgs {
+			var dailySummary alert_cs_prices.NotificationPriceSummary
+			err := json.Unmarshal(d.Body, &dailySummary)
+			if err != nil {
+				log.Println("Error daily report")
+			}
 
-	log.Printf("Testing summary")
+			report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 FOR %d \n", dailySummary.DiscordId, dailySummary.ItemId)
+			report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+			report += fmt.Sprintf("🟢 **Open**:   $%.2f\n", dailySummary.OpeningPrice/100)
+			report += fmt.Sprintf("🔴 **Close**:  $%.2f\n", dailySummary.ClosingPrice/100)
+			report += fmt.Sprintf("🔺 **High**:    $%.2f\n", dailySummary.MaxPrice/100)
+			report += fmt.Sprintf("🔻 **Low**:     $%.2f\n", dailySummary.MinPrice/100)
+			report += fmt.Sprintf("📌 **Avg**:     $%.2f\n", dailySummary.AvgPrice/100)
+			report += fmt.Sprintf("📈 **Change**: %.2f%%\n", dailySummary.ChangePct)
+			report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 
-	for d := range msgs {
-		var dailySummary alert_cs_prices.NotificationPriceSummary
-		err := json.Unmarshal(d.Body, &dailySummary)
-		if err != nil {
-			log.Printf("Error daily report")
+			a.BotService.SendMessageToChannel("1276782792876888075", report)
 		}
+	}()
 
-		report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 FOR %d \n", dailySummary.DiscordId, dailySummary.ItemId)
-		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-		report += fmt.Sprintf("🟢 **Open**:   $%.2f\n", dailySummary.OpeningPrice/100)
-		report += fmt.Sprintf("🔴 **Close**:  $%.2f\n", dailySummary.ClosingPrice/100)
-		report += fmt.Sprintf("🔺 **High**:    $%.2f\n", dailySummary.MaxPrice/100)
-		report += fmt.Sprintf("🔻 **Low**:     $%.2f\n", dailySummary.MinPrice/100)
-		report += fmt.Sprintf("📌 **Avg**:     $%.2f\n", dailySummary.AvgPrice/100)
-		report += fmt.Sprintf("📈 **Change**: %.2f%%\n", dailySummary.ChangePct)
-		report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-
-		a.BotService.SendMessageToChannel("1276782792876888075", report)
-	}
-
+	return close, nil
 }
 
 func (a *ActionHandlerCtrl) CreateSchedulerCsItems(s *discordgo.Session, i *discordgo.InteractionCreate) {

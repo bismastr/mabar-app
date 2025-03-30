@@ -76,12 +76,7 @@ func (b *Bot) AddAllCommand() {
 		log.Panic("dg is nil")
 	}
 
-	err := b.Dg.ApplicationCommandDelete(b.Dg.State.Application.ID, "", "")
-	if err != nil {
-		fmt.Printf("Error creating commands: %v", err)
-	}
-
-	_, err = b.Dg.ApplicationCommandBulkOverwrite(b.Dg.State.Application.ID, "", commands)
+	_, err := b.Dg.ApplicationCommandBulkOverwrite(b.Dg.State.Application.ID, "", commands)
 	if err != nil {
 		fmt.Printf("Error creating commands: %v", err)
 	}
