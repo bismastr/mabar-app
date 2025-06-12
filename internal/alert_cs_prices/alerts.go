@@ -16,6 +16,7 @@ type AlertPriceSertvice struct {
 
 type NotificationPriceSummary struct {
 	ItemId       int     `json:"item_id"`
+	ItemName     string  `json:"item_name"`
 	AvgPrice     float64 `json:"avg_price"`
 	MaxPrice     float64 `json:"max_price"`
 	MinPrice     float64 `json:"min_price"`

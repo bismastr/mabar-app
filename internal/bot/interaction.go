@@ -60,7 +60,7 @@ func (a *ActionHandlerCtrl) DailyScheduleSummary() (func(), error) {
 				log.Println("Error daily report")
 			}
 
-			report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 FOR %d \n", dailySummary.DiscordId, dailySummary.ItemId)
+			report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 **FOR %s** \n", dailySummary.DiscordId, dailySummary.ItemName)
 			report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 			report += fmt.Sprintf("🟢 **Open**:   $%.2f\n", dailySummary.OpeningPrice/100)
 			report += fmt.Sprintf("🔴 **Close**:  $%.2f\n", dailySummary.ClosingPrice/100)
