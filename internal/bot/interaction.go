@@ -70,7 +70,7 @@ func (a *ActionHandlerCtrl) DailyScheduleSummary() (func(), error) {
 			report += fmt.Sprintf("📈 **Change**: %.2f%%\n", dailySummary.ChangePct)
 			report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 
-			a.BotService.SendMessageToChannel("1276782792876888075", report)
+			a.BotService.SendMessageToChannel("1348197711773564949", report)
 		}
 	}()
 
