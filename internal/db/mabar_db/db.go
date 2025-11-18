@@ -18,7 +18,8 @@ func NewDatabase() (*Db, error) {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 	dbHost := os.Getenv(("DB_HOST"))
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", dbHost, dbUser, dbPassword, dbName, "5432")
+	dbPort := os.Getenv("DB_PORT")
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", dbHost, dbUser, dbPassword, dbName, dbPort)
 
 	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {

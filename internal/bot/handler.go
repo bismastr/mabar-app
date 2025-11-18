@@ -1,40 +1,75 @@
 package bot
 
 import (
+	"log"
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 )
 
-func (b *Bot) RegisterHandler(h *ActionHandlerCtrl) {
+type HandlerRegistry struct {
+	commands      map[string]CommandHandler
+	components    map[string]ComponentHandler
+	autocompletes map[string]AutocompleteHandler
+}
+
+func NewHandlerRegistry() *HandlerRegistry {
+	return &HandlerRegistry{
+		commands:      make(map[string]CommandHandler),
+		components:    make(map[string]ComponentHandler),
+		autocompletes: make(map[string]AutocompleteHandler),
+	}
+}
+
+func (r *HandlerRegistry) RegisterCommand(handler CommandHandler) {
+	r.commands[handler.Name()] = handler
+}
+
+func (r *HandlerRegistry) RegisterComponent(handler ComponentHandler) {
+	r.components[handler.CustomIDPrefix()] = handler
+}
+
+func (r *HandlerRegistry) RegisterAutocomplete(handler AutocompleteHandler) {
+	r.autocompletes[handler.Name()] = handler
+}
+
+func (b *Bot) RegisterHandlers(registry *HandlerRegistry) {
 	b.Dg.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		b.interactionHandler(h, s, i)
+		b.handleInteraction(registry, s, i)
 	})
 }
 
-func (b *Bot) interactionHandler(h *ActionHandlerCtrl, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	var (
-		commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-			"create-mabar":          h.CreateMabar,
-			"ask-ai":                h.GenerateContent,
-			"create-daily-cs-alert": h.CreateSchedulerCsItems,
-		}
-		componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-			"mabar_no":    h.DeclineGamingSession,
-			"mabarv2_yes": h.JoinGamingSessionV2,
-		}
-	)
-
+func (b *Bot) handleInteraction(registry *HandlerRegistry, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
-		if h, ok := commandsHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
+		commandName := i.ApplicationCommandData().Name
+		if handler, ok := registry.commands[commandName]; ok {
+			if err := handler.Handle(s, i); err != nil {
+				log.Printf("Error handling command %s: %v", commandName, err)
+			}
 		}
 	case discordgo.InteractionMessageComponent:
-		prefix := getPrefix(i)
-
-		if h, ok := componentsHandlers[prefix]; ok {
-			h(s, i)
+		customID := i.MessageComponentData().CustomID
+		prefix := extractPrefix(customID)
+		if handler, ok := registry.components[prefix]; ok {
+			if err := handler.Handle(s, i); err != nil {
+				log.Printf("Error handling component %s: %v", prefix, err)
+			}
 		}
 	case discordgo.InteractionApplicationCommandAutocomplete:
-		h.CsItemsAutocomplete(s, i)
+		commandName := i.ApplicationCommandData().Name
+		if handler, ok := registry.autocompletes[commandName]; ok {
+			if err := handler.Handle(s, i); err != nil {
+				log.Printf("Error handling autocomplete %s: %v", commandName, err)
+			}
+		}
 	}
+}
+
+func extractPrefix(customID string) string {
+	parts := strings.Split(customID, "_")
+	if len(parts) >= 2 {
+		return parts[0] + "_" + parts[1]
+	}
+	return customID
 }

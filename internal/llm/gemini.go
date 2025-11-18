@@ -29,7 +29,7 @@ func NewGeminiClient(ctx context.Context) *GeminiClient {
 		log.Fatal(err)
 	}
 
-	model := client.GenerativeModel("gemini-1.5-flash")
+	model := client.GenerativeModel("gemini-2.5-flash")
 
 	return &GeminiClient{
 		Model: model,

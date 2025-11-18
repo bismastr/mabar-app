@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -11,13 +13,11 @@ import (
 	"github.com/bismastr/discord-bot/internal/auth"
 	"github.com/bismastr/discord-bot/internal/bot"
 	"github.com/bismastr/discord-bot/internal/config"
-	"github.com/bismastr/discord-bot/internal/db/cs_prices_db"
 	"github.com/bismastr/discord-bot/internal/db/mabar_db"
 	"github.com/bismastr/discord-bot/internal/firebase"
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
 	"github.com/bismastr/discord-bot/internal/llm"
-	"github.com/bismastr/discord-bot/internal/messaging"
 	"github.com/bismastr/discord-bot/internal/notification"
 	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/bismastr/discord-bot/internal/server"
@@ -33,18 +33,13 @@ func main() {
 	}
 	defer db.Conn.Close()
 
-	csPricesDb, err := cs_prices_db.NewDatabase()
-	if err != nil {
-		panic(err)
-	}
-
 	ctx := context.Background()
 
 	firebase, err := firebase.NewFirebaseClient(ctx)
 	if err != nil {
 		panic(err)
 	}
-	csRepository := repository.New(csPricesDb.Conn)
+
 	repository := repository.New(db.Conn)
 
 	dg, _ := discordgo.New(config.Envs.DiscordBotToken)
@@ -64,35 +59,55 @@ func main() {
 	userService := user.NewUserService(repository)
 	notificationService := notification.NewNotificationClient(firebase.Messaging)
 
-	consumer, err := messaging.NewConsumer(config.Envs.RmqUrl)
-	if err != nil {
-		log.Fatal("Unable create consumer")
-	}
-	alertPriceService, err := alert_cs_prices.NewAlertPriceServcie(consumer, csRepository)
-	if err != nil {
-		log.Fatal("Unable create price service")
-	}
-
 	gemini := llm.NewGeminiClient(ctx)
 	llmService := llm.NewLlmService(gemini)
 
 	//Start Discord
-	botHandler := bot.NewActionHandlerCtrl(userService, gaming_session, botService, llmService, alertPriceService, ctx)
-
-	discordBot.RegisterHandler(botHandler)
+	bot.SetupHandlers(discordBot, userService, gaming_session, botService, llmService, ctx)
 	discordBot.Open()
 	discordBot.AddAllCommand()
-	close, _ := botHandler.DailyScheduleSummary()
 
 	//Start server
 	handler := handler.NewHandler(botService, authService, userService, gaming_session, notificationService)
 	server := server.NewServer(gin.Default(), discordBot.Dg)
 	server.RegisterRoutes(handler)
 	server.Start()
-
-	defer close()
 	exit(dg)
 	defer dg.Close()
+}
+
+func setupDailySummary(alertService *alert_cs_prices.AlertPriceSertvice, botService *bot.BotService) (func(), error) {
+	log.Println("Setting up daily report summary")
+	msgs, close, err := alertService.DailyReportSummary()
+	if err != nil {
+		log.Println("Error setting up daily report")
+		return nil, err
+	}
+
+	go func() {
+		for d := range msgs {
+			var dailySummary alert_cs_prices.NotificationPriceSummary
+			err := json.Unmarshal(d.Body, &dailySummary)
+			if err != nil {
+				log.Println("Error unmarshaling daily report:", err)
+				continue
+			}
+
+			report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 **FOR %s** \n", dailySummary.DiscordId, dailySummary.ItemName)
+			report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+			report += fmt.Sprintf("🟢 **Open**:   $%.2f\n", dailySummary.OpeningPrice/100)
+			report += fmt.Sprintf("🔴 **Close**:  $%.2f\n", dailySummary.ClosingPrice/100)
+			report += fmt.Sprintf("🔺 **High**:    $%.2f\n", dailySummary.MaxPrice/100)
+			report += fmt.Sprintf("🔻 **Low**:     $%.2f\n", dailySummary.MinPrice/100)
+			report += fmt.Sprintf("📌 **Avg**:     $%.2f\n", dailySummary.AvgPrice/100)
+			report += fmt.Sprintf("📈 **Change**: %.2f%%\n", dailySummary.ChangePct)
+			report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+
+			botService.SendMessageToChannel("1348197711773564949", report)
+		}
+	}()
+
+	return close, nil
 }
 
 func exit(dg *discordgo.Session) {
