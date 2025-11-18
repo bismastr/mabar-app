@@ -1,9 +1,14 @@
 package bot
 
 import (
+	"context"
 	"log"
 	"strings"
 
+	"github.com/bismastr/discord-bot/internal/bot/handlers"
+	"github.com/bismastr/discord-bot/internal/gaming_session"
+	"github.com/bismastr/discord-bot/internal/llm"
+	"github.com/bismastr/discord-bot/internal/user"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -64,6 +69,28 @@ func (b *Bot) handleInteraction(registry *HandlerRegistry, s *discordgo.Session,
 			}
 		}
 	}
+}
+
+func SetupHandlers(
+	bot *Bot,
+	userService *user.UserService,
+	sessionService *gaming_session.GamingSessionService,
+	botService *BotService,
+	llmService *llm.LlmService,
+	ctx context.Context,
+) {
+	registry := NewHandlerRegistry()
+
+	registry.RegisterCommand(handlers.NewCreateMabarHandler(userService, sessionService, botService, ctx))
+	registry.RegisterCommand(handlers.NewAIHandler(llmService, ctx))
+	// registry.RegisterCommand(handlers.NewCSAlertHandler(alertService, ctx))
+
+	registry.RegisterComponent(handlers.NewJoinSessionHandler(userService, sessionService, ctx))
+	registry.RegisterComponent(handlers.NewDeclineSessionHandler())
+
+	// registry.RegisterAutocomplete(handlers.NewCSAutocompleteHandler(alertService, ctx))
+
+	bot.RegisterHandlers(registry)
 }
 
 func extractPrefix(customID string) string {
