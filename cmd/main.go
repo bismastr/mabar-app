@@ -18,6 +18,7 @@ import (
 	"github.com/bismastr/discord-bot/internal/gaming_session"
 	"github.com/bismastr/discord-bot/internal/handler"
 	"github.com/bismastr/discord-bot/internal/llm"
+	"github.com/bismastr/discord-bot/internal/messaging"
 	"github.com/bismastr/discord-bot/internal/notification"
 	"github.com/bismastr/discord-bot/internal/repository"
 	"github.com/bismastr/discord-bot/internal/server"
@@ -58,6 +59,8 @@ func main() {
 	botService := bot.NewBotService(discordBot.Dg)
 	userService := user.NewUserService(repository)
 	notificationService := notification.NewNotificationClient(firebase.Messaging)
+	messagingConsumer, _ := messaging.NewConsumer(config.Envs.RmqUrl)
+	alertService, _ := alert_cs_prices.NewAlertPriceServcie(messagingConsumer, repository)
 
 	gemini := llm.NewGeminiClient(ctx)
 	llmService := llm.NewLlmService(gemini)
@@ -66,6 +69,7 @@ func main() {
 	bot.SetupHandlers(discordBot, userService, gaming_session, botService, llmService, ctx)
 	discordBot.Open()
 	discordBot.AddAllCommand()
+	setupDailySummary(alertService, botService)
 
 	//Start server
 	handler := handler.NewHandler(botService, authService, userService, gaming_session, notificationService)
@@ -86,21 +90,32 @@ func setupDailySummary(alertService *alert_cs_prices.AlertPriceSertvice, botServ
 
 	go func() {
 		for d := range msgs {
+			log.Printf("Received message body: %s", string(d.Body))
+
 			var dailySummary alert_cs_prices.NotificationPriceSummary
 			err := json.Unmarshal(d.Body, &dailySummary)
 			if err != nil {
-				log.Println("Error unmarshaling daily report:", err)
+				log.Printf("Error unmarshaling daily report: %v | Raw body: %s", err, string(d.Body))
 				continue
 			}
 
-			report := fmt.Sprintf("📊 **DAILY SUMMARY** <@%d> 📊 **FOR %s** \n", dailySummary.DiscordId, dailySummary.ItemName)
+			var alertEmoji, trendEmoji, colorCode string
+			if dailySummary.AlertType == "INCREASE" {
+				alertEmoji = "📈"
+				trendEmoji = "🟢"
+				colorCode = "```ansi\n\u001b[1;32m" // Green
+			} else {
+				alertEmoji = "📉"
+				trendEmoji = "🔴"
+				colorCode = "```ansi\n\u001b[1;31m" // Red
+			}
+
+			report := fmt.Sprintf("%s **24H PRICE ALERT** - %s %s\n", trendEmoji, dailySummary.ItemName, trendEmoji)
 			report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-			report += fmt.Sprintf("🟢 **Open**:   $%.2f\n", dailySummary.OpeningPrice/100)
-			report += fmt.Sprintf("🔴 **Close**:  $%.2f\n", dailySummary.ClosingPrice/100)
-			report += fmt.Sprintf("🔺 **High**:    $%.2f\n", dailySummary.MaxPrice/100)
-			report += fmt.Sprintf("🔻 **Low**:     $%.2f\n", dailySummary.MinPrice/100)
-			report += fmt.Sprintf("📌 **Avg**:     $%.2f\n", dailySummary.AvgPrice/100)
-			report += fmt.Sprintf("📈 **Change**: %.2f%%\n", dailySummary.ChangePct)
+			report += colorCode
+			report += fmt.Sprintf("%s Trend: %s\n", alertEmoji, dailySummary.AlertType)
+			report += fmt.Sprintf("💰 Change: %.2f%%\n", dailySummary.ChangePct)
+			report += "\u001b[0m```\n"
 			report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 
 			botService.SendMessageToChannel("1348197711773564949", report)
