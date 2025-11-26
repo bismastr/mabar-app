@@ -115,8 +115,8 @@ func setupDailySummary(alertService *alert_cs_prices.AlertPriceSertvice, botServ
 			report += colorCode
 			report += fmt.Sprintf("%s Trend: %s\n", alertEmoji, dailySummary.AlertType)
 			report += fmt.Sprintf("💰 Change: %.2f%%\n", dailySummary.ChangePct)
-			report += fmt.Sprintf("🆕 Latest Price: $%d\n", dailySummary.LatestSellPrice)
-			report += fmt.Sprintf("🕰️ Old Price: $%d\n", dailySummary.OldSellPrice)
+			report += fmt.Sprintf("🆕 Latest Price: $%.2f	\n", dailySummary.LatestSellPrice)
+			report += fmt.Sprintf("🕰️ Old Price: $%.2f\n", dailySummary.OldSellPrice)
 			report += "\u001b[0m```\n"
 			report += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 

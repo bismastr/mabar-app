@@ -15,8 +15,8 @@ type NotificationPriceSummary struct {
 	ChangePct       float64 `json:"change_pct"`
 	Name            string  `json:"name"`
 	AlertType       string  `json:"alert_type"`
-	LatestSellPrice int32   `json:"latest_price"`
-	OldSellPrice    int32   `json:"old_price"`
+	LatestSellPrice float64 `json:"latest_price"`
+	OldSellPrice    float64 `json:"old_price"`
 }
 
 func NewAlertPriceServcie(consumer *messaging.Consumer, repositoryCsPrices *repository.Queries) (*AlertPriceSertvice, error) {
