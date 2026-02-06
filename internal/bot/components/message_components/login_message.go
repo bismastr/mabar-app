@@ -7,7 +7,7 @@ import (
 )
 
 func NeedLoginMessage(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	messageContent := "*Unable to join, user not yet registered*\n### Go register now to join mabar sessions! 🔥\n[Join Here](https://api-mabar.bism.app/api/v1/auth/discord)\n"
+	messageContent := "*Unable to join, user not yet registered*\n### Go register now to join mabar sessions! 🔥\n[Join Here](https://api-mabar.bismasatria.com/api/v1/auth/discord)\n"
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
