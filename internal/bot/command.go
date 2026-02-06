@@ -49,7 +49,7 @@ var (
 							Value: 4,
 						},
 						{
-							Name:  "FragPunk Game Terbaik",
+							Name:  "EA Sports FC 25",
 							Value: 5,
 						},
 					},
