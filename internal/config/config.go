@@ -42,8 +42,8 @@ func initConfig() Config {
 		DiscordClientSecret:     getEnvOrError("DISCORD_CLIENT_SECRET"),
 		DiscordBotToken:         fmt.Sprintf("Bot %v", getEnv("DISCORD_BOT_TOKEN", "token")),
 		SessionName:             getEnv("SESSION_NAME", "session_user"),
-		CallbackRedirectUrl:     getEnv("CALLBACK_URL", "http://mabar.bismasatria.com"),
-		CookiesDomain:           getEnv("COOKIES_DOMAIN_NAME", "http://mabar.bismasatria.com"),
+		CallbackRedirectUrl:     getEnv("CALLBACK_URL", "https://mabar.bismasatria.com"),
+		CookiesDomain:           getEnv("COOKIES_DOMAIN_NAME", "https://mabar.bismasatria.com"),
 		RmqUrl:                  getEnv("RMQ_URL", "empty url check your config"),
 	}
 }
