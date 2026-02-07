@@ -13,7 +13,7 @@ func JoinSessionV2(s *discordgo.Session, i *discordgo.InteractionCreate, userId 
 		memberMentioned += fmt.Sprintf("<@%v>", user.DiscordUid.Int64)
 	}
 
-	messageContent := fmt.Sprintf("<@%d> join abang quh 🥳\n\nArek-arek sing join 👥:%v  ", userId, memberMentioned)
+	messageContent := fmt.Sprintf("<@%d> join abang quh 🥳\n\nPlayers  👥:%v  ", userId, memberMentioned)
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
