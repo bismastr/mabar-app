@@ -27,9 +27,9 @@ func (b *BotService) SendMessageToChannel(channelId, content string) error {
 }
 
 func (b *BotService) CreateGamingSession(gamingSession *gaming_session.GetGamingSessionResponse, channelId string) (*discordgo.Message, error) {
-	content := fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\n%s \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> MABAR ᴄʀᴇᴀᴛᴇᴅ ʙʏ <@%d>\n> Try mabar website: [Mabar Website](https://mabar.bismasatria.com/)", gamingSession.Game.GameName.String, gamingSession.CreatedBy.DiscordUid.Int64)
+	content := fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\n%s \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> Try mabar website: [Mabar Website](https://mabar.bismasatria.com/)", gamingSession.Game.GameName.String)
 	if gamingSession.Game.GameName.String == "" {
-		content = fmt.Sprintf("# Info mabar? @here\n🎮 **Playing** 🎮\nBebas Asal Sopan \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> MABAR ᴄʀᴇᴀᴛᴇᴅ ʙʏ <@%d>\n> Try mabar website: [Mabar Website](https://mabar.bismasatria.com/)", gamingSession.CreatedBy.UserID.Int64)
+		content = "# Info mabar? @here\n🎮 **Playing** 🎮\nBebas Asal Sopan \n\n🕐 On 🕐\n[Malam Ini]\n\n👥 Players 👥\n\n\n> Try mabar website: [Mabar Website](https://mabar.bismasatria.com/)"
 	}
 
 	customId := fmt.Sprintf("mabarv2_yes_%d", gamingSession.SessionID)
